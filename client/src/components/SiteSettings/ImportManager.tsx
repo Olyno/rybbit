@@ -50,7 +50,7 @@ const importFormSchema = z.object({
         const file = files[0];
         return file && file.size <= MAX_FILE_SIZE;
       },
-      `File size must be less than ${MAX_FILE_SIZE / 1024 / 1024}MB`
+      IS_CLOUD ? `File size must be less than ${MAX_FILE_SIZE / 1024 / 1024}MB` : "File size exceeds maximum allowed"
     )
     .refine(files => {
       const file = files[0];
