@@ -6,7 +6,14 @@
       "Bash([ -d hooks ])",
       "WebFetch(domain:carto.com)",
       "Bash(npx tsc:*)",
-      "Bash(npm run lint)"
+      "Bash(npm run lint)",
+      "WebFetch(domain:www.mintlify.com)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "Bash(npm install @marsidev/react-turnstile)",
+      "Bash(npm install @marsidev/react-turnstile --legacy-peer-deps)",
+      "WebFetch(domain:clickhouse.com)",
+      "WebFetch(domain:docs.licensing.appsumo.com)"
     ],
     "deny": [],
     "ask": []

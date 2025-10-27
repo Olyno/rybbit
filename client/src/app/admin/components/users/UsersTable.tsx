@@ -19,6 +19,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { UserTableSkeleton } from "./UserTableSkeleton";
 import { userStore } from "@/lib/userStore";
 import { SortableHeader } from "../shared/SortableHeader";
+import { parseUtcTimestamp } from "../../../../lib/dateTimeUtils";
 
 interface UsersTableProps {
   data: { users: AdminUser[]; total: number } | undefined;
@@ -73,7 +74,7 @@ export function UsersTable({
       {
         accessorKey: "createdAt",
         header: ({ column }) => <SortableHeader column={column}>Created At</SortableHeader>,
-        cell: ({ row }) => new Date(row.getValue("createdAt")).toLocaleDateString(),
+        cell: ({ row }) => <div>{parseUtcTimestamp(row.getValue("createdAt")).toRelative()}</div>,
       },
       {
         id: "actions",

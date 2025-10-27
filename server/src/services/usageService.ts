@@ -1,15 +1,14 @@
 import { and, eq } from "drizzle-orm";
 import { DateTime } from "luxon";
 import * as cron from "node-cron";
-import Stripe from "stripe";
 import { processResults } from "../api/analytics/utils.js";
 import { clickhouse } from "../db/clickhouse/clickhouse.js";
 import { db } from "../db/postgres/postgres.js";
 import { member, organization, sites, user } from "../db/postgres/schema.js";
-import { DEFAULT_EVENT_LIMIT, getStripePrices, IS_CLOUD, StripePlan } from "../lib/const.js";
+import { IS_CLOUD } from "../lib/const.js";
 import { sendLimitExceededEmail } from "../lib/email/email.js";
 import { createServiceLogger } from "../lib/logger/logger.js";
-import { stripe } from "../lib/stripe.js";
+import { getBestSubscription } from "../lib/subscriptionUtils.js";
 
 class UsageService {
   private sitesOverLimit = new Set<number>();
@@ -104,8 +103,8 @@ class UsageService {
   }
 
   /**
-   * Gets event limit and billing period start date for an organization based on their Stripe subscription.
-   * Fetches directly from Stripe if the organization has a stripeCustomerId.
+   * Gets event limit and billing period start date for an organization based on their best subscription.
+   * Checks both AppSumo and Stripe subscriptions and uses the one with the higher event limit.
    * @returns [eventLimit, periodStartDate]
    */
   private async getOrganizationSubscriptionInfo(orgData: {
@@ -114,82 +113,28 @@ class UsageService {
     createdAt: string;
     name: string;
   }): Promise<[number, string | null]> {
+    // Special case for specific organizations
     if (orgData.name === "tomato 2" || orgData.name === "Zam") {
       return [Infinity, this.getStartOfMonth()];
     }
-    if (orgData.name.includes("AppSumo")) {
-      return [1000000, this.getStartOfMonth()];
+
+    // Get the best subscription (highest event limit from AppSumo or Stripe)
+    const subscription = await getBestSubscription(orgData.id, orgData.stripeCustomerId);
+
+    // Log subscription details
+    if (subscription.source === "appsumo") {
+      this.logger.info(
+        `Organization ${orgData.name} using AppSumo ${subscription.planName} with ${subscription.eventLimit} events/month`
+      );
+    } else if (subscription.source === "stripe") {
+      this.logger.info(
+        `Organization ${orgData.name} using Stripe ${subscription.planName} (${subscription.interval}) with ${subscription.eventLimit} events/month`
+      );
+    } else {
+      this.logger.info(`Organization ${orgData.name} on free tier with ${subscription.eventLimit} events/month`);
     }
-    if (!orgData.stripeCustomerId) {
-      // No Stripe customer ID, use default limit and start of current month
-      return [DEFAULT_EVENT_LIMIT, this.getStartOfMonth()];
-    }
 
-    try {
-      // Fetch active subscriptions for the customer from Stripe
-      const subscriptions = await (stripe as Stripe).subscriptions.list({
-        customer: orgData.stripeCustomerId,
-        status: "active",
-        limit: 1,
-      });
-
-      if (subscriptions.data.length === 0) {
-        return [DEFAULT_EVENT_LIMIT, this.getStartOfMonth()];
-      }
-
-      const subscription = subscriptions.data[0];
-      const subscriptionItem = subscription.items.data[0];
-
-      const priceId = subscriptionItem.price.id;
-
-      if (!priceId) {
-        this.logger.error(
-          `Subscription item price ID not found for organization ${orgData.id}, sub ${subscription.id}`
-        );
-        return [DEFAULT_EVENT_LIMIT, this.getStartOfMonth()];
-      }
-
-      // Find corresponding plan details from constants
-      const planDetails = getStripePrices().find((plan: StripePlan) => plan.priceId === priceId);
-
-      // Get the event limit from the plan
-      const eventLimit = planDetails
-        ? planDetails.limits.events // This is already the monthly event limit, regardless of billing interval
-        : DEFAULT_EVENT_LIMIT;
-
-      // For the period start, we need to handle several cases:
-      const currentMonthStart = this.getStartOfMonth();
-      let periodStart = currentMonthStart;
-
-      if (subscriptionItem.current_period_start) {
-        // Convert subscription start timestamp to DateTime
-        const subscriptionStartDate = DateTime.fromSeconds(subscriptionItem.current_period_start);
-        const currentMonth = DateTime.now().startOf("month");
-
-        // If the subscription started within the current month, use that as the start date
-        // This ensures we don't count events from before they subscribed (e.g., during their free trial)
-        if (subscriptionStartDate >= currentMonth) {
-          periodStart = subscriptionStartDate.toISODate() as string;
-          this.logger.info(
-            `Organization ${orgData.name} subscribed during current month on ${periodStart}. Using subscription start date for counting.`
-          );
-        } else {
-          this.logger.info(
-            `Organization ${orgData.name} subscription started before current month. Using month start for counting.`
-          );
-        }
-      }
-
-      // Include subscription info for logging purposes
-      const interval = subscriptionItem.price.recurring?.interval || "unknown";
-      this.logger.info(`Organization ${orgData.name} has a ${interval} subscription.`);
-
-      return [eventLimit, periodStart];
-    } catch (error: any) {
-      this.logger.error(error as Error, `Error fetching Stripe subscription info for organization ${orgData.name}`);
-      // Fallback to default limit and current month start on Stripe API error
-      return [DEFAULT_EVENT_LIMIT, this.getStartOfMonth()];
-    }
+    return [subscription.eventLimit, subscription.periodStart];
   }
 
   /**

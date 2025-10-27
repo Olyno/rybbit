@@ -23,6 +23,7 @@ import { AdminLayout } from "../shared/AdminLayout";
 import { GrowthChart } from "../shared/GrowthChart";
 import Link from "next/link";
 import { Favicon } from "../../../../components/Favicon";
+import { parseUtcTimestamp } from "../../../../lib/dateTimeUtils";
 
 export function Sites() {
   const { data: sites, isLoading, isError } = useAdminSites();
@@ -75,13 +76,7 @@ export function Sites() {
       {
         accessorKey: "createdAt",
         header: ({ column }) => <SortableHeader column={column}>Created</SortableHeader>,
-        cell: ({ row }) => (
-          <div>
-            {formatDistanceToNow(row.getValue("createdAt"), {
-              addSuffix: true,
-            })}
-          </div>
-        ),
+        cell: ({ row }) => <div>{parseUtcTimestamp(row.getValue("createdAt")).toRelative()}</div>,
       },
       {
         accessorKey: "public",
@@ -142,15 +137,15 @@ export function Sites() {
 
   if (isError) {
     return (
-      <AdminLayout title="Sites">
+      <AdminLayout>
         <ErrorAlert message="Failed to load sites data. Please try again later." />
       </AdminLayout>
     );
   }
 
   return (
-    <AdminLayout title="Sites">
-      <GrowthChart data={sites || []} title="Sites" color="#10b981" />
+    <AdminLayout>
+      <GrowthChart data={sites} title="Sites" color="#10b981" />
 
       <div className="mb-4">
         <SearchInput placeholder="Search by domain or owner email..." value={searchQuery} onChange={setSearchQuery} />

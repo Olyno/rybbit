@@ -129,10 +129,7 @@ export function Organizations() {
       {
         accessorKey: "createdAt",
         header: ({ column }) => <SortableHeader column={column}>Created</SortableHeader>,
-        cell: ({ row }) =>
-          formatDistanceToNow(parseUtcTimestamp(row.getValue("createdAt")).toJSDate(), {
-            addSuffix: true,
-          }),
+        cell: ({ row }) => <div>{parseUtcTimestamp(row.getValue("createdAt")).toRelative()}</div>,
       },
       {
         accessorKey: "monthlyEventCount",
@@ -227,15 +224,15 @@ export function Organizations() {
 
   if (isError) {
     return (
-      <AdminLayout title="Organizations">
+      <AdminLayout>
         <ErrorAlert message="Failed to load organizations data. Please try again later." />
       </AdminLayout>
     );
   }
 
   return (
-    <AdminLayout title="Organizations">
-      <GrowthChart data={organizations || []} title="Organizations" color="#8b5cf6" />
+    <AdminLayout>
+      <GrowthChart data={organizations} color="#8b5cf6" title="Organizations" />
 
       <div className="mb-4">
         <SearchInput

@@ -13,11 +13,10 @@ import {
   findPriceForTier,
   formatEventTier,
 } from "./utils";
-import { getStripePrices } from "../../../lib/stripe";
 import { trackAdEvent } from "../../../lib/trackAdEvent";
+import { DEFAULT_EVENT_LIMIT } from "../../../lib/subscription/constants";
 
 export function PricingCard({ isLoggedIn }: { isLoggedIn: boolean }) {
-  const stripePrices = getStripePrices();
   const [eventLimitIndex, setEventLimitIndex] = useState<number>(0);
   const [isAnnual, setIsAnnual] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -45,7 +44,7 @@ export function PricingCard({ isLoggedIn }: { isLoggedIn: boolean }) {
       return;
     }
 
-    const selectedTierPrice = findPriceForTier(eventLimit, isAnnual ? "year" : "month", stripePrices, planType);
+    const selectedTierPrice = findPriceForTier(eventLimit, isAnnual ? "year" : "month", planType);
 
     if (!selectedTierPrice) {
       toast.error("Selected pricing plan not found. Please adjust the slider.");
@@ -97,10 +96,10 @@ export function PricingCard({ isLoggedIn }: { isLoggedIn: boolean }) {
   }
 
   // Get pricing information for both plans
-  const standardMonthlyPrice = findPriceForTier(eventLimit, "month", stripePrices, "standard")?.price || 0;
-  const standardAnnualPrice = findPriceForTier(eventLimit, "year", stripePrices, "standard")?.price || 0;
-  const proMonthlyPrice = findPriceForTier(eventLimit, "month", stripePrices, "pro")?.price || 0;
-  const proAnnualPrice = findPriceForTier(eventLimit, "year", stripePrices, "pro")?.price || 0;
+  const standardMonthlyPrice = findPriceForTier(eventLimit, "month", "standard")?.price || 0;
+  const standardAnnualPrice = findPriceForTier(eventLimit, "year", "standard")?.price || 0;
+  const proMonthlyPrice = findPriceForTier(eventLimit, "month", "pro")?.price || 0;
+  const proAnnualPrice = findPriceForTier(eventLimit, "year", "pro")?.price || 0;
   const isCustomTier = eventLimit === "Custom";
 
   return (
@@ -177,7 +176,7 @@ export function PricingCard({ isLoggedIn }: { isLoggedIn: boolean }) {
             {/* Price display */}
             <div className="mb-6">
               <div>
-                <span className="text-3xl font-bold">10,000</span>
+                <span className="text-3xl font-bold">{DEFAULT_EVENT_LIMIT.toLocaleString()}</span>
                 <span className="ml-1 text-neutral-400">/month events</span>
               </div>
             </div>
