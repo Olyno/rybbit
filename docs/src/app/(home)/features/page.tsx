@@ -1,3 +1,4 @@
+import { SectionBadge } from "@/components/SectionBadge";
 import { TrackedButton } from "@/components/TrackedButton";
 import { DEFAULT_EVENT_LIMIT } from "@/lib/const";
 import {
@@ -317,9 +318,9 @@ export default function FeaturesPage() {
       <section className="py-16 md:py-24 w-full">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center max-w-4xl mx-auto">
-            <div className="inline-block bg-emerald-900/30 text-emerald-400 px-3 py-1 rounded-full text-sm font-medium mb-6">
+            <SectionBadge className="mb-6">
               Features
-            </div>
+            </SectionBadge>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
               Everything you need to understand your audience
             </h1>

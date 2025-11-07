@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Marquee } from "@/components/magicui/marquee";
+import { SectionBadge } from "@/components/SectionBadge";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -58,9 +59,9 @@ export function Integrations() {
   return (
     <div className="py-20 w-full">
       <div className="max-w-7xl mx-auto px-4 mb-10 text-center">
-        <div className="inline-block bg-emerald-900/30 text-emerald-400 px-3 py-1 rounded-full text-sm font-medium mb-4">
+        <SectionBadge className="mb-4">
           Seamless Integration
-        </div>
+        </SectionBadge>
         <h2 className="text-4xl font-bold mb-3">Works with all your favorite platforms</h2>
         <p className="text-xl text-neutral-300 font-light">Integrate Rybbit with any platform in minutes</p>
       </div>
