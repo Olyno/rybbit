@@ -1,8 +1,7 @@
 "use client";
 import { TimeBucket } from "@rybbit/shared";
-import { getNivoTheme } from "@/lib/nivo";
+import { useNivoTheme } from "@/lib/nivo";
 import { StatType, useStore } from "@/lib/store";
-import { useTheme } from "next-themes";
 import { LineCustomSvgLayer, LineCustomSvgLayerProps, LineSeries, ResponsiveLine } from "@nivo/line";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { DateTime } from "luxon";
@@ -130,8 +129,7 @@ export function Chart({
 }) {
   const { time, bucket, selectedStat } = useStore();
   const { width } = useWindowSize();
-  const { theme } = useTheme();
-  const nivoTheme = getNivoTheme(theme === "dark");
+  const nivoTheme = useNivoTheme();
 
   const maxTicks = Math.round((width ?? Infinity) / 75);
 

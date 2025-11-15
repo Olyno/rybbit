@@ -2,13 +2,12 @@
 
 import { Card, CardContent, CardLoader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getNivoTheme } from "@/lib/nivo";
+import { useNivoTheme } from "@/lib/nivo";
 import { ResponsiveLine } from "@nivo/line";
 import { DateTime } from "luxon";
 import { Tilt_Warp } from "next/font/google";
 import Link from "next/link";
 import { useState } from "react";
-import { useTheme } from "next-themes";
 import { useGetPerformanceTimeSeries } from "../../../../api/analytics/performance/useGetPerformanceTimeSeries";
 import { BucketSelection } from "../../../../components/BucketSelection";
 import { RybbitLogo } from "../../../../components/RybbitLogo";
@@ -29,8 +28,7 @@ export function PerformanceChart() {
   const session = authClient.useSession();
   const { site, bucket } = useStore();
   const { selectedPerformanceMetric, selectedPercentile } = usePerformanceStore();
-  const { theme } = useTheme();
-  const nivoTheme = getNivoTheme(theme === "dark");
+  const nivoTheme = useNivoTheme();
 
   // State for toggling percentile visibility
   const [visiblePercentiles, setVisiblePercentiles] = useState<Set<string>>(new Set(["P50", "P75", "P90", "P99"]));

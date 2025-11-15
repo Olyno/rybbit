@@ -2,11 +2,10 @@
 
 import { GetErrorBucketedResponse } from "@/api/analytics/errors/useGetErrorBucketed";
 import { hour12, userLocale } from "@/lib/dateTimeUtils";
-import { getNivoTheme } from "@/lib/nivo";
+import { useNivoTheme } from "@/lib/nivo";
 import { ResponsiveBar } from "@nivo/bar";
 import { DateTime } from "luxon";
 import { useMemo } from "react";
-import { useTheme } from "next-themes";
 
 interface ErrorSparklineChartProps {
   data: GetErrorBucketedResponse | undefined;
@@ -16,8 +15,7 @@ interface ErrorSparklineChartProps {
 }
 
 export function ErrorSparklineChart({ data, isHovering, errorMessage, isLoading }: ErrorSparklineChartProps) {
-  const { theme } = useTheme();
-  const nivoTheme = getNivoTheme(theme === "dark");
+  const nivoTheme = useNivoTheme();
 
   const chartData = useMemo(() => {
     if (!data || data.length === 0) {

@@ -1,4 +1,7 @@
+"use client";
+
 import { PartialTheme } from "@nivo/theming";
+import { useTheme } from "next-themes";
 
 export const getNivoTheme = (isDark: boolean = true): PartialTheme => ({
   axis: {
@@ -45,6 +48,12 @@ export const getNivoTheme = (isDark: boolean = true): PartialTheme => ({
     },
   },
 });
+
+// Custom hook that automatically uses the resolved theme
+export const useNivoTheme = (): PartialTheme => {
+  const { resolvedTheme } = useTheme();
+  return getNivoTheme(resolvedTheme === "dark");
+};
 
 // Export default dark theme for backwards compatibility
 export const nivoTheme: PartialTheme = getNivoTheme(true);

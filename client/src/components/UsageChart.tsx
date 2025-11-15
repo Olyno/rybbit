@@ -1,5 +1,5 @@
 "use client";
-import { getNivoTheme } from "@/lib/nivo";
+import { useNivoTheme } from "@/lib/nivo";
 import { ResponsiveLine } from "@nivo/line";
 import { useWindowSize } from "@uidotdev/usehooks";
 import { DateTime } from "luxon";
@@ -7,7 +7,6 @@ import { useGetOrgEventCount } from "../api/analytics/useGetOrgEventCount";
 import { userLocale } from "../lib/dateTimeUtils";
 import { formatter } from "../lib/utils";
 import { Badge } from "./ui/badge";
-import { useTheme } from "next-themes";
 import { ChartTooltip } from "./charts/ChartTooltip";
 
 interface UsageChartProps {
@@ -19,8 +18,7 @@ interface UsageChartProps {
 
 export function UsageChart({ organizationId, startDate, endDate, timeZone = "UTC" }: UsageChartProps) {
   const { width } = useWindowSize();
-  const { theme } = useTheme();
-  const nivoTheme = getNivoTheme(theme === "dark");
+  const nivoTheme = useNivoTheme();
 
   // Fetch the data inside the component
   const { data, isLoading, error } = useGetOrgEventCount({

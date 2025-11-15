@@ -1,6 +1,6 @@
 "use client";
 
-import { getNivoTheme } from "@/lib/nivo";
+import { useNivoTheme } from "@/lib/nivo";
 import { ResponsiveLine } from "@nivo/line";
 import { DateTime } from "luxon";
 import { useMemo } from "react";
@@ -54,8 +54,8 @@ const RetentionChartSkeleton = () => (
 );
 
 export function RetentionChart({ data, isLoading, mode }: RetentionChartProps) {
-  const { theme } = useTheme();
-  const nivoTheme = getNivoTheme(theme === "dark");
+  const { resolvedTheme } = useTheme();
+  const nivoTheme = useNivoTheme();
 
   // Get cohort keys once for both chart data and tooltip
   const cohortKeys = useMemo(() => {
@@ -184,7 +184,7 @@ export function RetentionChart({ data, isLoading, mode }: RetentionChartProps) {
                 },
               },
             ],
-            itemTextColor: theme === "dark" ? "hsl(var(--neutral-200))" : "hsl(var(--neutral-700))",
+            itemTextColor: resolvedTheme === "dark" ? "hsl(var(--neutral-200))" : "hsl(var(--neutral-700))",
           },
         ]}
         tooltip={({ point }) => {
