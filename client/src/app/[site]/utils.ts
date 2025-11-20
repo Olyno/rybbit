@@ -1,14 +1,15 @@
 "use client";
 
-import { useQueryState, parseAsBoolean } from "nuqs";
+import { useSearchParams } from "next/navigation";
 import { useCurrentSite } from "../../api/admin/sites";
 
 export const useEmbedablePage = () => {
-  const [embed] = useQueryState("embed", parseAsBoolean);
+  const searchParams = useSearchParams();
+  const embed = searchParams.get("embed");
 
   const { subscription } = useCurrentSite();
 
-  if (embed && subscription?.planName !== "free") {
+  if (embed === "true" && subscription?.planName !== "free") {
     return true;
   }
 

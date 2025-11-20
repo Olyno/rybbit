@@ -12,10 +12,9 @@ import { motion } from "framer-motion";
 import { ArrowRight, Check } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import React, { Suspense, useEffect, useState } from "react";
 import { addSite } from "../../../api/admin/sites";
-import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
 import { useSetPageTitle } from "../../../hooks/useSetPageTitle";
 import { authClient } from "../../../lib/auth";
 import { IS_CLOUD } from "../../../lib/const";
@@ -29,6 +28,32 @@ const contentVariants = {
   visible: { opacity: 1, x: 0, transition: { duration: 0.3 } },
 };
 
+// Client component to handle AppSumo code from URL params
+function AppSumoCodeHandler({
+  onSetCode,
+  onSetStep,
+}: {
+  onSetCode: (code: string) => void;
+  onSetStep: (step: number) => void;
+}) {
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const code = searchParams.get("code");
+    if (code) {
+      onSetCode(code);
+    }
+
+    // Handle step override for testing
+    const step = searchParams.get("step");
+    if (step && !isNaN(Number(step))) {
+      onSetStep(Number(step));
+    }
+  }, [searchParams, onSetCode, onSetStep]);
+
+  return null;
+}
+
 export default function AppSumoSignupPage() {
   useSetPageTitle("Rybbit · AppSumo Signup");
 
@@ -37,22 +62,6 @@ export default function AppSumoSignupPage() {
   const [error, setError] = useState<string>("");
   const [appsumoCode, setAppsumoCode] = useState<string>("");
   const router = useRouter();
-
-  // Get code and step from URL params
-  const [{ code, step: stepParam }] = useQueryStates({
-    code: parseAsString,
-    step: parseAsInteger,
-  });
-
-  // Sync URL params with local state
-  useEffect(() => {
-    if (code) {
-      setAppsumoCode(code);
-    }
-    if (stepParam && stepParam >= 1 && stepParam <= 3) {
-      setCurrentStep(stepParam);
-    }
-  }, [code, stepParam]);
 
   // Step 1: Account creation
   const [email, setEmail] = useState("");
@@ -367,6 +376,11 @@ export default function AppSumoSignupPage() {
   return (
     <div className="flex justify-center items-center h-dvh w-full p-4 ">
       <div className="flex flex-col items-center bg-background relative">
+        {/* Suspense boundary for the URL parameter handler */}
+        <Suspense fallback={null}>
+          <AppSumoCodeHandler onSetCode={setAppsumoCode} onSetStep={setCurrentStep} />
+        </Suspense>
+
         {/* Background gradients similar to docs page */}
         <div className="absolute top-0 left-0 w-[550px] h-[550px] bg-emerald-500/40 rounded-full blur-[80px] opacity-40"></div>
         <div className="absolute top-20 left-20 w-[400px] h-[400px] bg-emerald-600/30 rounded-full blur-[70px] opacity-30"></div>

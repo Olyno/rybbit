@@ -12,8 +12,8 @@ import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
 import { ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import React, { Suspense, useEffect, useState } from "react";
 import { addSite } from "../../api/admin/sites";
 import { RybbitLogo, RybbitTextLogo } from "../../components/RybbitLogo";
 import { useSetPageTitle } from "../../hooks/useSetPageTitle";
@@ -22,7 +22,6 @@ import { useConfigs } from "../../lib/configs";
 import { IS_CLOUD } from "../../lib/const";
 import { userStore } from "../../lib/userStore";
 import { cn, isValidDomain, normalizeDomain } from "../../lib/utils";
-import { useQueryState, parseAsInteger } from "nuqs";
 
 // Animation variants for step transitions
 const contentVariants = {
@@ -30,19 +29,25 @@ const contentVariants = {
   visible: { opacity: 1, x: 0, transition: { duration: 0.3 } },
 };
 
+// Client component to handle step from URL params
+function StepHandler({ onSetStep }: { onSetStep: (step: number) => void }) {
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const step = searchParams.get("step");
+    if (step && !isNaN(Number(step))) {
+      onSetStep(Number(step));
+    }
+  }, [searchParams, onSetStep]);
+
+  return null;
+}
+
 export default function SignupPage() {
   const { configs, isLoading: isLoadingConfigs } = useConfigs();
   useSetPageTitle("Rybbit · Signup");
 
   const [currentStep, setCurrentStep] = useState(1);
-  const [stepParam] = useQueryState("step", parseAsInteger);
-
-  // Sync URL step param with local state on mount
-  useEffect(() => {
-    if (stepParam && stepParam >= 1 && stepParam <= 3) {
-      setCurrentStep(stepParam);
-    }
-  }, [stepParam]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const router = useRouter();
@@ -375,6 +380,11 @@ export default function SignupPage() {
   return (
     <div className="flex justify-center items-center h-dvh w-full p-4 ">
       <div className="flex flex-col items-center bg-background relative">
+        {/* Suspense boundary for the URL parameter handler */}
+        <Suspense fallback={null}>
+          <StepHandler onSetStep={setCurrentStep} />
+        </Suspense>
+
         {/* Background gradients similar to docs page */}
         {/* <div className="absolute top-0 left-0 w-[550px] h-[550px] bg-emerald-500/40 rounded-full blur-[80px] opacity-40"></div>
         <div className="absolute top-20 left-20 w-[400px] h-[400px] bg-emerald-600/30 rounded-full blur-[70px] opacity-30"></div>
