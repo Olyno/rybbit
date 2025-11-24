@@ -2,6 +2,7 @@ import { ToolPageLayout } from "../../components/ToolPageLayout";
 import { FontGeneratorTool } from "../../components/FontGeneratorTool";
 import AICommentForm from "../../components/AICommentForm";
 import PageNameGenerator from "../../components/PageNameGenerator";
+import PostGenerator from "../../components/PostGenerator";
 import { platformConfigs, platformList } from "../../components/platform-configs";
 import {
   commentPlatformConfigs,
@@ -11,6 +12,10 @@ import {
   pageNamePlatformConfigs,
   pageNamePlatformList,
 } from "../../components/page-name-platform-configs";
+import {
+  postGeneratorPlatformConfigs,
+  postGeneratorPlatformList,
+} from "../../components/post-generator-platform-configs";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -34,7 +39,16 @@ export async function generateStaticParams() {
     slug: `${platform.id}-page-name-generator`,
   }));
 
-  return [...fontGenerators, ...commentGenerators, ...pageNameGenerators];
+  const postGenerators = postGeneratorPlatformList.map((platform) => ({
+    slug: `${platform.id}-post-generator`,
+  }));
+
+  return [
+    ...fontGenerators,
+    ...commentGenerators,
+    ...pageNameGenerators,
+    ...postGenerators,
+  ];
 }
 
 // Generate metadata dynamically based on slug
@@ -42,6 +56,36 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { slug } = await params;
+
+  // Check if it's a post generator
+  if (slug.endsWith("-post-generator")) {
+    const platformId = slug.replace("-post-generator", "");
+    const platform = postGeneratorPlatformConfigs[platformId];
+
+    if (!platform) {
+      return { title: "Post Generator Not Found" };
+    }
+
+    return {
+      title: `${platform.displayName} | AI-Powered ${platform.name} Posts`,
+      description: platform.description,
+      openGraph: {
+        title: platform.displayName,
+        description: platform.description,
+        type: "website",
+        url: `https://rybbit.com/tools/${platform.id}-post-generator`,
+        siteName: "Rybbit Documentation",
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: platform.displayName,
+        description: platform.description,
+      },
+      alternates: {
+        canonical: `https://rybbit.com/tools/${platform.id}-post-generator`,
+      },
+    };
+  }
 
   // Check if it's a page name generator
   if (slug.endsWith("-page-name-generator")) {
@@ -136,6 +180,175 @@ export async function generateMetadata({
 
 export default async function PlatformToolPage({ params }: PageProps) {
   const { slug } = await params;
+
+  // Check if it's a post generator
+  if (slug.endsWith("-post-generator")) {
+    const platformId = slug.replace("-post-generator", "");
+    const platform = postGeneratorPlatformConfigs[platformId];
+
+    // Handle invalid platform
+    if (!platform) {
+      notFound();
+    }
+
+    const structuredData = {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      name: platform.displayName,
+      description: platform.description,
+      url: `https://rybbit.com/tools/${platform.id}-post-generator`,
+      applicationCategory: "Utility",
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "USD",
+      },
+      author: {
+        "@type": "Organization",
+        name: "Rybbit",
+        url: "https://rybbit.com",
+      },
+    };
+
+    const educationalContent = (
+      <>
+        <h2 className="text-2xl font-bold text-neutral-900 dark:text-white mb-4">
+          About {platform.name} Posts
+        </h2>
+        <p className="text-neutral-700 dark:text-neutral-300 leading-relaxed mb-6">
+          {platform.educationalContent}
+        </p>
+
+        <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">
+          How to Use This Tool
+        </h3>
+        <ol className="space-y-2 text-neutral-700 dark:text-neutral-300 mb-6">
+          <li>
+            <strong>Describe your topic</strong> - What do you want to post
+            about?
+          </li>
+          <li>
+            <strong>Select a style</strong> - Choose from{" "}
+            {platform.recommendedStyles.length} platform-optimized styles
+          </li>
+          <li>
+            <strong>Add context (optional)</strong> - Include specific details,
+            CTAs, or hashtags
+          </li>
+          <li>
+            <strong>Click "Generate Posts"</strong> to get 3 unique variations
+          </li>
+          <li>
+            <strong>Copy and customize</strong> your favorite post before
+            publishing
+          </li>
+        </ol>
+
+        <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">
+          Available Post Styles
+        </h3>
+        <ul className="grid grid-cols-2 gap-2 text-sm text-neutral-700 dark:text-neutral-300 mb-6">
+          {platform.recommendedStyles.map((style) => (
+            <li key={style} className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              {style}
+            </li>
+          ))}
+        </ul>
+
+        <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-3">
+          Best Practices for {platform.name}
+        </h3>
+        <ul className="space-y-2 text-neutral-700 dark:text-neutral-300 mb-6">
+          <li>
+            <strong>Be authentic:</strong> Personalize AI-generated content to
+            match your voice
+          </li>
+          <li>
+            <strong>Add value:</strong> Ensure your post provides insights,
+            entertainment, or useful information
+          </li>
+          <li>
+            <strong>Engage your audience:</strong> Include questions or CTAs to
+            encourage interaction
+          </li>
+          <li>
+            <strong>Optimize timing:</strong> Post when your audience is most
+            active
+          </li>
+          <li>
+            <strong>Review before posting:</strong> Always edit and customize
+            generated content
+          </li>
+        </ul>
+
+        <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-6">
+          <strong>Note:</strong> While this tool generates high-quality posts,
+          always review and personalize content before publishing. Authentic
+          engagement comes from adding your unique perspective and voice.
+        </p>
+      </>
+    );
+
+    const faqs = [
+      {
+        question: `How does the ${platform.name} post generator work?`,
+        answer: `This tool uses AI to create platform-optimized posts based on your topic and chosen style. It considers ${platform.name}'s best practices, character limits, and engagement patterns to generate content that resonates with your audience.`,
+      },
+      {
+        question: "What post styles are available?",
+        answer: `You can choose from ${platform.recommendedStyles.length} styles: ${platform.recommendedStyles.join(", ")}. Each style is optimized for ${platform.name} and designed to maximize engagement for different types of content.`,
+      },
+      {
+        question: "Should I edit the generated posts?",
+        answer:
+          "Yes! Generated posts are starting points. Always personalize them with your unique voice, specific details, and brand personality. The best posts combine AI efficiency with human authenticity.",
+      },
+      {
+        question: "How many posts can I generate?",
+        answer:
+          "The tool generates 3 unique post variations per request. You're limited to 5 requests per minute. If you need more variations, try adjusting your topic or style.",
+      },
+      {
+        question: "Will the posts sound natural?",
+        answer: `Yes! The AI is trained to create authentic, engaging content that matches ${platform.name}'s tone and style. However, adding your personal touch makes posts even more effective and genuine.`,
+      },
+      {
+        question: "How can Rybbit help me measure post performance?",
+        answer: (
+          <>
+            Rybbit tracks clicks, engagement, and traffic from your{" "}
+            {platform.name} posts. See which content drives the most interaction
+            and optimize your social media strategy.{" "}
+            <a
+              href="https://rybbit.com"
+              className="text-emerald-600 hover:text-emerald-500 underline"
+            >
+              Start tracking for free
+            </a>
+            .
+          </>
+        ),
+      },
+    ];
+
+    return (
+      <ToolPageLayout
+        toolSlug={`${platform.id}-post-generator`}
+        title={platform.displayName}
+        description={platform.description}
+        badge="AI-Powered Tool"
+        toolComponent={<PostGenerator platform={platform} />}
+        educationalContent={educationalContent}
+        faqs={faqs}
+        relatedToolsCategory="social-media"
+        ctaTitle={`Optimize your ${platform.name} strategy with Rybbit`}
+        ctaDescription="Track which posts drive the most engagement and refine your content strategy with data-driven insights."
+        ctaEventLocation={`${platform.id}_post_generator_cta`}
+        structuredData={structuredData}
+      />
+    );
+  }
 
   // Check if it's a page name generator
   if (slug.endsWith("-page-name-generator")) {

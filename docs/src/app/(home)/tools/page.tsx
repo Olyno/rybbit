@@ -25,6 +25,7 @@ import {
 import { platformList } from "./components/platform-configs";
 import { commentPlatformList } from "./components/comment-platform-configs";
 import { pageNamePlatformList } from "./components/page-name-platform-configs";
+import { postGeneratorPlatformList } from "./components/post-generator-platform-configs";
 import {
   SiDiscord,
   SiX,
@@ -254,7 +255,19 @@ const pageNameGeneratorTools = pageNamePlatformList.map(platform => ({
   description: `Generate creative ${platform.pageType.toLowerCase()} names for ${platform.name} with AI.`,
 }));
 
-const socialMediaTools = [...fontGeneratorTools, ...commentGeneratorTools, ...pageNameGeneratorTools];
+const postGeneratorTools = postGeneratorPlatformList.map(platform => ({
+  href: `/tools/${platform.id}-post-generator`,
+  icon: platformIconMap[platform.id],
+  title: platform.displayName,
+  description: `Generate engaging posts for ${platform.name} with AI-powered content creation.`,
+}));
+
+const socialMediaTools = [
+  ...fontGeneratorTools,
+  ...commentGeneratorTools,
+  ...pageNameGeneratorTools,
+  ...postGeneratorTools,
+];
 
 function ToolCard({ tool }: { tool: { href: string; icon: any; title: string; description: string } }) {
   const Icon = tool.icon;

@@ -453,6 +453,72 @@ const allTools: Tool[] = [
     href: "/tools/substack-page-name-generator",
     category: "social-media",
   },
+  {
+    name: "LinkedIn Post Generator",
+    description: "Generate professional LinkedIn posts with AI",
+    href: "/tools/linkedin-post-generator",
+    category: "social-media",
+  },
+  {
+    name: "X (Twitter) Post Generator",
+    description: "Generate engaging X (Twitter) posts with AI",
+    href: "/tools/x-post-generator",
+    category: "social-media",
+  },
+  {
+    name: "Facebook Post Generator",
+    description: "Generate engaging Facebook posts with AI",
+    href: "/tools/facebook-post-generator",
+    category: "social-media",
+  },
+  {
+    name: "Instagram Caption Generator",
+    description: "Generate creative Instagram captions with AI",
+    href: "/tools/instagram-post-generator",
+    category: "social-media",
+  },
+  {
+    name: "Threads Post Generator",
+    description: "Generate engaging Threads posts with AI",
+    href: "/tools/threads-post-generator",
+    category: "social-media",
+  },
+  {
+    name: "Reddit Post Generator",
+    description: "Generate authentic Reddit posts with AI",
+    href: "/tools/reddit-post-generator",
+    category: "social-media",
+  },
+  {
+    name: "TikTok Caption Generator",
+    description: "Generate trendy TikTok captions with AI",
+    href: "/tools/tiktok-post-generator",
+    category: "social-media",
+  },
+  {
+    name: "YouTube Description Generator",
+    description: "Generate optimized YouTube descriptions with AI",
+    href: "/tools/youtube-post-generator",
+    category: "social-media",
+  },
+  {
+    name: "Pinterest Pin Description Generator",
+    description: "Generate compelling Pinterest descriptions with AI",
+    href: "/tools/pinterest-post-generator",
+    category: "social-media",
+  },
+  {
+    name: "Medium Article Intro Generator",
+    description: "Generate compelling Medium article intros with AI",
+    href: "/tools/medium-post-generator",
+    category: "social-media",
+  },
+  {
+    name: "Substack Newsletter Post Generator",
+    description: "Generate engaging Substack posts with AI",
+    href: "/tools/substack-post-generator",
+    category: "social-media",
+  },
 ];
 
 interface RelatedToolsProps {
