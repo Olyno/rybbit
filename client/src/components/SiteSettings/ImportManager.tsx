@@ -211,7 +211,6 @@ export function ImportManager({ siteId, disabled }: ImportManagerProps) {
                   <SelectItem value="umami">Umami</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-sm text-muted-foreground">Select the analytics platform you're importing data from</p>
             </div>
 
             {/* File Upload */}
@@ -229,11 +228,6 @@ export function ImportManager({ siteId, disabled }: ImportManagerProps) {
                 onChange={handleFileChange}
                 disabled={disabled || createImportMutation.isPending || hasActiveImport}
               />
-              {selectedFile && (
-                <p className="text-sm text-muted-foreground">
-                  Selected: {selectedFile.name} ({formatFileSize(selectedFile.size)})
-                </p>
-              )}
               {fileError && <p className="text-sm text-red-600">{fileError}</p>}
             </div>
 
