@@ -16,7 +16,6 @@ interface UmamiEvent {
   url_path: string;
   url_query: string;
   referrer_path: string;
-  referrer_query: string;
   referrer_domain: string;
   page_title: string;
   event_type: string;
@@ -139,7 +138,6 @@ export class CsvParser {
       url_path: rawEvent.url_path,
       url_query: rawEvent.url_query,
       referrer_path: rawEvent.referrer_path,
-      referrer_query: rawEvent.referrer_query,
       referrer_domain: rawEvent.referrer_domain,
       page_title: rawEvent.page_title,
       event_type: rawEvent.event_type,

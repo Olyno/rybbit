@@ -28,7 +28,7 @@ export interface UmamiEvent {
   // utm_content: string; // Ignore, part of url_query
   // utm_term: string; // Ignore, part of url_query
   referrer_path: string;
-  referrer_query: string;
+  // referrer_query: string; // Ignore
   referrer_domain: string;
   page_title: string;
 
@@ -136,10 +136,6 @@ export class UmamiImportMapper {
       .max(2048)
       .transform(querystring => (querystring ? `?${querystring}` : "")),
     referrer_path: z.string().max(2048),
-    referrer_query: z
-      .string()
-      .max(2048)
-      .transform(querystring => (querystring ? `?${querystring}` : "")),
     referrer_domain: z
       .string()
       .max(253)
@@ -154,7 +150,7 @@ export class UmamiImportMapper {
 
   static readonly umamiEventKeyOnlySchema = deriveKeyOnlySchema(UmamiImportMapper.umamiEventSchema);
 
-  static transform(events: UmamiEvent[], site: string, importId: string): RybbitEvent[] {
+  static transform(events: UmamiEvent[], site: number, importId: string): RybbitEvent[] {
     return events.reduce<RybbitEvent[]>((acc, event) => {
       const parsed = UmamiImportMapper.umamiEventSchema.safeParse(event);
       if (!parsed.success) {
@@ -162,11 +158,11 @@ export class UmamiImportMapper {
       }
 
       const data = parsed.data;
-      const referrer = data.referrer_domain + data.referrer_path + data.referrer_query;
+      const referrer = data.referrer_domain + data.referrer_path;
       const [screenWidth, screenHeight] = data.screen ? data.screen.split("x") : ["0", "0"];
 
       acc.push({
-        site_id: Number(site),
+        site_id: site,
         timestamp: data.created_at,
         session_id: data.session_id,
         user_id: data.distinct_id,
@@ -176,7 +172,7 @@ export class UmamiImportMapper {
         url_parameters: getAllUrlParams(data.url_query),
         page_title: data.page_title,
         referrer: clearSelfReferrer(referrer, data.hostname.replace(/^www\./, "")),
-        channel: getChannel(referrer, data.referrer_query, data.hostname),
+        channel: getChannel(referrer, data.url_query, data.hostname),
         browser: data.browser,
         browser_version: "",
         operating_system: data.os,

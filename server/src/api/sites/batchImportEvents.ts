@@ -12,7 +12,7 @@ import { eq } from "drizzle-orm";
 const batchImportRequestSchema = z
   .object({
     params: z.object({
-      site: z.string().min(1),
+      site: z.coerce.number().int(),
       importId: z.string().uuid(),
     }),
     body: z.object({
@@ -40,7 +40,6 @@ export async function batchImportEvents(request: FastifyRequest<BatchImportReque
 
     const { site, importId } = parsed.data.params;
     const { events, isLastBatch } = parsed.data.body;
-    const siteId = Number(site);
 
     const userHasAccess = await getUserHasAdminAccessToSite(request, site);
     if (!userHasAccess) {
@@ -52,14 +51,14 @@ export async function batchImportEvents(request: FastifyRequest<BatchImportReque
       return reply.status(404).send({ error: "Import not found" });
     }
 
-    if (importRecord.siteId !== siteId) {
+    if (importRecord.siteId !== site) {
       return reply.status(400).send({ error: "Import does not belong to this site" });
     }
 
     const [siteRecord] = await db
       .select({ organizationId: sites.organizationId })
       .from(sites)
-      .where(eq(sites.siteId, siteId))
+      .where(eq(sites.siteId, site))
       .limit(1);
 
     if (!siteRecord || !siteRecord.organizationId) {
