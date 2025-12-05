@@ -1,0 +1,82 @@
+---
+title: Get Overview
+description: Retrieve high-level analytics metrics for a site
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+```
+GET /api/overview/:site
+```
+
+Returns high-level analytics metrics for a site.
+
+## Path Parameters
+
+<TypeTable
+  type={{
+    site: {
+      description: 'Site ID or site identifier',
+      type: 'string | number',
+      required: true,
+    },
+  }}
+/>
+
+## Query Parameters
+
+Accepts all [Common Parameters](/docs/api/stats/guide#common-parameters) (time and filters).
+
+## Response
+
+<TypeTable
+  type={{
+    sessions: {
+      description: 'Total number of sessions',
+      type: 'number',
+    },
+    pageviews: {
+      description: 'Total number of pageviews',
+      type: 'number',
+    },
+    users: {
+      description: 'Total unique users',
+      type: 'number',
+    },
+    pages_per_session: {
+      description: 'Average pages viewed per session',
+      type: 'number',
+    },
+    bounce_rate: {
+      description: 'Percentage of single-page sessions',
+      type: 'number',
+      typeDescription: 'Range: 0-100',
+    },
+    session_duration: {
+      description: 'Average session duration in seconds',
+      type: 'number',
+    },
+  }}
+/>
+
+## Example Request
+
+```bash
+curl -X GET "https://api.rybbit.com/api/overview/123?start_date=2024-01-01&end_date=2024-01-31&time_zone=America/New_York" \
+  -H "Authorization: Bearer your_api_key_here"
+```
+
+## Example Response
+
+```json
+{
+  "data": {
+    "sessions": 15420,
+    "pageviews": 48933,
+    "users": 12847,
+    "pages_per_session": 3.17,
+    "bounce_rate": 42.8,
+    "session_duration": 182.5
+  }
+}
+```

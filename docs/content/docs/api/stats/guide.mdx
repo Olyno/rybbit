@@ -1,6 +1,6 @@
 ---
-title: Stats API
-description: Retrieve analytics data programmatically with the Rybbit Stats API
+title: Stats API Guide
+description: Authentication, common parameters, and best practices for the Rybbit Stats API
 ---
 
 import { TypeTable } from 'fumadocs-ui/components/type-table';
@@ -118,7 +118,7 @@ The `filters` parameter accepts a JSON-encoded array of filter objects to narrow
     type: {
       description: 'The type of comparison to perform',
       type: 'FilterType',
-      typeDescription: '"equals" | "not_equals" | "contains" | "not_contains"',
+      typeDescription: '"equals" | "not_equals" | "contains" | "not_contains" | "regex" | "not_regex" | "greater_than" | "less_than"',
       required: true,
     },
     value: {
@@ -130,7 +130,56 @@ The `filters` parameter accepts a JSON-encoded array of filter objects to narrow
   }}
 />
 
+#### Filter Types
+
+<TypeTable
+  type={{
+    equals: {
+      description: 'Exact match',
+      type: 'string',
+      typeDescription: 'Value must exactly match',
+    },
+    not_equals: {
+      description: 'Exclude exact matches',
+      type: 'string',
+      typeDescription: 'Value must not match',
+    },
+    contains: {
+      description: 'Substring match',
+      type: 'string',
+      typeDescription: 'Value must contain the substring (uses SQL LIKE %value%)',
+    },
+    not_contains: {
+      description: 'Exclude substring matches',
+      type: 'string',
+      typeDescription: 'Value must not contain the substring',
+    },
+    regex: {
+      description: 'Regular expression match',
+      type: 'string',
+      typeDescription: 'Value must match the regex pattern (max 500 characters)',
+    },
+    not_regex: {
+      description: 'Exclude regex matches',
+      type: 'string',
+      typeDescription: 'Value must not match the regex pattern',
+    },
+    greater_than: {
+      description: 'Numeric greater than',
+      type: 'number',
+      typeDescription: 'For numeric fields like lat, lon',
+    },
+    less_than: {
+      description: 'Numeric less than',
+      type: 'number',
+      typeDescription: 'For numeric fields like lat, lon',
+    },
+  }}
+/>
+
 #### Available Filter Parameters
+
+**Browser & Device**
 
 <TypeTable
   type={{
@@ -139,43 +188,80 @@ The `filters` parameter accepts a JSON-encoded array of filter objects to narrow
       type: 'string',
       typeDescription: 'e.g., "Chrome", "Firefox", "Safari"',
     },
+    browser_version: {
+      description: 'Browser with version',
+      type: 'string',
+      typeDescription: 'e.g., "Chrome 120"',
+    },
     operating_system: {
       description: 'Operating system name',
       type: 'string',
       typeDescription: 'e.g., "Windows", "macOS", "Linux"',
     },
-    language: {
-      description: 'Browser language',
+    operating_system_version: {
+      description: 'OS with version',
       type: 'string',
-      typeDescription: 'e.g., "en-US", "es-ES"',
-    },
-    country: {
-      description: 'Country code',
-      type: 'string',
-      typeDescription: 'ISO 3166-1 alpha-2 code, e.g., "US", "GB"',
-    },
-    region: {
-      description: 'Geographic region',
-      type: 'string',
-    },
-    city: {
-      description: 'City name',
-      type: 'string',
+      typeDescription: 'e.g., "Windows 10/11", "macOS 14"',
     },
     device_type: {
       description: 'Device category',
       type: 'string',
       typeDescription: '"desktop", "mobile", "tablet"',
     },
-    referrer: {
-      description: 'HTTP referrer URL',
+    dimensions: {
+      description: 'Screen dimensions',
       type: 'string',
+      typeDescription: 'e.g., "1920x1080", "390x844"',
     },
-    hostname: {
-      description: 'Website hostname',
+    language: {
+      description: 'Browser language',
       type: 'string',
-      typeDescription: 'e.g., "example.com"',
+      typeDescription: 'e.g., "en-US", "es-ES"',
     },
+  }}
+/>
+
+**Location**
+
+<TypeTable
+  type={{
+    country: {
+      description: 'Country code',
+      type: 'string',
+      typeDescription: 'ISO 3166-1 alpha-2 code, e.g., "US", "GB"',
+    },
+    region: {
+      description: 'Geographic region/state',
+      type: 'string',
+      typeDescription: 'e.g., "California", "England"',
+    },
+    city: {
+      description: 'City name with region prefix',
+      type: 'string',
+      typeDescription: 'Format: "Region-City", e.g., "CA-San Francisco"',
+    },
+    timezone: {
+      description: 'User timezone',
+      type: 'string',
+      typeDescription: 'IANA timezone, e.g., "America/New_York"',
+    },
+    lat: {
+      description: 'Latitude',
+      type: 'number',
+      typeDescription: 'Supports greater_than, less_than, equals (with 0.001 tolerance)',
+    },
+    lon: {
+      description: 'Longitude',
+      type: 'number',
+      typeDescription: 'Supports greater_than, less_than, equals (with 0.001 tolerance)',
+    },
+  }}
+/>
+
+**Page & Traffic**
+
+<TypeTable
+  type={{
     pathname: {
       description: 'URL pathname',
       type: 'string',
@@ -185,13 +271,27 @@ The `filters` parameter accepts a JSON-encoded array of filter objects to narrow
       description: 'HTML page title',
       type: 'string',
     },
+    hostname: {
+      description: 'Website hostname',
+      type: 'string',
+      typeDescription: 'e.g., "example.com"',
+    },
     querystring: {
       description: 'URL query string',
       type: 'string',
       typeDescription: 'e.g., "?ref=twitter"',
     },
-    event_name: {
-      description: 'Custom event name',
+    referrer: {
+      description: 'Referrer domain (without www)',
+      type: 'string',
+      typeDescription: 'e.g., "google.com", "twitter.com"',
+    },
+    entry_page: {
+      description: 'First page in session (landing page)',
+      type: 'string',
+    },
+    exit_page: {
+      description: 'Last page in session',
       type: 'string',
     },
     channel: {
@@ -199,13 +299,22 @@ The `filters` parameter accepts a JSON-encoded array of filter objects to narrow
       type: 'string',
       typeDescription: 'e.g., "Direct", "Organic Search", "Social"',
     },
+  }}
+/>
+
+**UTM Parameters**
+
+<TypeTable
+  type={{
     utm_source: {
       description: 'UTM source parameter',
       type: 'string',
+      typeDescription: 'e.g., "google", "newsletter"',
     },
     utm_medium: {
       description: 'UTM medium parameter',
       type: 'string',
+      typeDescription: 'e.g., "cpc", "email"',
     },
     utm_campaign: {
       description: 'UTM campaign parameter',
@@ -219,25 +328,22 @@ The `filters` parameter accepts a JSON-encoded array of filter objects to narrow
       description: 'UTM content parameter',
       type: 'string',
     },
-    entry_page: {
-      description: 'First page in session',
-      type: 'string',
-    },
-    exit_page: {
-      description: 'Last page in session',
-      type: 'string',
-    },
+  }}
+/>
+
+**User & Events**
+
+<TypeTable
+  type={{
     user_id: {
-      description: 'Custom user identifier',
+      description: 'User identifier',
       type: 'string',
+      typeDescription: 'Matches both device fingerprint and custom identified user ID',
     },
-    browser_version: {
-      description: 'Browser version',
+    event_name: {
+      description: 'Custom event name',
       type: 'string',
-    },
-    operating_system_version: {
-      description: 'OS version',
-      type: 'string',
+      typeDescription: 'Filters to sessions containing the event',
     },
   }}
 />
@@ -271,246 +377,48 @@ The `filters` parameter accepts a JSON-encoded array of filter objects to narrow
 ]
 ```
 
+**Contains filter (substring match):**
+```json
+[
+  {
+    "parameter": "pathname",
+    "type": "contains",
+    "value": ["/blog"]
+  }
+]
+```
+
+**Regex filter (pattern match):**
+```json
+[
+  {
+    "parameter": "pathname",
+    "type": "regex",
+    "value": ["^/products/[0-9]+$"]
+  }
+]
+```
+
+**Numeric comparison (geolocation):**
+```json
+[
+  {
+    "parameter": "lat",
+    "type": "greater_than",
+    "value": ["37.0"]
+  },
+  {
+    "parameter": "lat",
+    "type": "less_than",
+    "value": ["38.0"]
+  }
+]
+```
+
+
 **URL-encoded:**
 ```
 ?filters=%5B%7B%22parameter%22%3A%22country%22%2C%22type%22%3A%22equals%22%2C%22value%22%3A%5B%22US%22%5D%7D%5D
-```
-
----
-
-## Endpoints
-
-### Get Overview
-
-```
-GET /api/overview/:site
-```
-
-Returns high-level analytics metrics for a site.
-
-#### Path Parameters
-
-<TypeTable
-  type={{
-    site: {
-      description: 'Site ID or site identifier',
-      type: 'string | number',
-      required: true,
-    },
-  }}
-/>
-
-#### Query Parameters
-
-Accepts all [Common Parameters](#common-parameters) (time and filters).
-
-#### Response
-
-<TypeTable
-  type={{
-    sessions: {
-      description: 'Total number of sessions',
-      type: 'number',
-    },
-    pageviews: {
-      description: 'Total number of pageviews',
-      type: 'number',
-    },
-    users: {
-      description: 'Total unique users',
-      type: 'number',
-    },
-    pages_per_session: {
-      description: 'Average pages viewed per session',
-      type: 'number',
-    },
-    bounce_rate: {
-      description: 'Percentage of single-page sessions',
-      type: 'number',
-      typeDescription: 'Range: 0-100',
-    },
-    session_duration: {
-      description: 'Average session duration in seconds',
-      type: 'number',
-    },
-  }}
-/>
-
-#### Example Request
-
-```bash
-curl -X GET "https://api.rybbit.com/api/overview/123?start_date=2024-01-01&end_date=2024-01-31&time_zone=America/New_York" \
-  -H "Authorization: Bearer your_api_key_here"
-```
-
-#### Example Response
-
-```json
-{
-  "data": {
-    "sessions": 15420,
-    "pageviews": 48933,
-    "users": 12847,
-    "pages_per_session": 3.17,
-    "bounce_rate": 42.8,
-    "session_duration": 182.5
-  }
-}
-```
-
----
-
-### Get Metric
-
-```
-GET /api/metric/:site
-```
-
-Returns dimensional analytics data broken down by a specific parameter. Supports pagination.
-
-#### Path Parameters
-
-<TypeTable
-  type={{
-    site: {
-      description: 'Site ID or site identifier',
-      type: 'string | number',
-      required: true,
-    },
-  }}
-/>
-
-#### Query Parameters
-
-Accepts all [Common Parameters](#common-parameters) plus the following:
-
-<TypeTable
-  type={{
-    parameter: {
-      description: 'The dimension to break down by',
-      type: 'FilterParameter',
-      typeDescription: 'e.g., "pathname", "country", "browser", "event_name"',
-      required: true,
-    },
-    limit: {
-      description: 'Number of results per page',
-      type: 'number',
-      default: 100,
-    },
-    page: {
-      description: 'Page number (1-indexed)',
-      type: 'number',
-      default: 1,
-    },
-  }}
-/>
-
-#### Response
-
-<TypeTable
-  type={{
-    data: {
-      description: 'Array of metric results',
-      type: 'MetricItem[]',
-      typeDescription: 'See MetricItem structure below',
-    },
-    totalCount: {
-      description: 'Total number of unique values across all pages',
-      type: 'number',
-    },
-  }}
-/>
-
-#### MetricItem Structure
-
-<TypeTable
-  type={{
-    value: {
-      description: 'The dimension value',
-      type: 'string',
-      typeDescription: 'e.g., "/blog", "Chrome", "US"',
-    },
-    count: {
-      description: 'Number of sessions for this value',
-      type: 'number',
-    },
-    percentage: {
-      description: 'Percentage of total sessions',
-      type: 'number',
-      typeDescription: 'Range: 0-100',
-    },
-    pageviews: {
-      description: 'Total pageviews (for page-related parameters)',
-      type: 'number',
-      required: false,
-    },
-    pageviews_percentage: {
-      description: 'Percentage of total pageviews',
-      type: 'number',
-      required: false,
-    },
-    time_on_page_seconds: {
-      description: 'Average time on page (for page-related parameters)',
-      type: 'number',
-      required: false,
-    },
-    bounce_rate: {
-      description: 'Bounce rate percentage',
-      type: 'number',
-      typeDescription: 'Range: 0-100',
-      required: false,
-    },
-    pathname: {
-      description: 'Representative pathname (for page_title parameter)',
-      type: 'string',
-      required: false,
-    },
-  }}
-/>
-
-#### Example Request
-
-```bash
-curl -X GET "https://api.rybbit.com/api/metric/123?parameter=country&start_date=2024-01-01&end_date=2024-01-31&time_zone=America/New_York&limit=10&page=1" \
-  -H "Authorization: Bearer your_api_key_here"
-```
-
-#### Example Response
-
-```json
-{
-  "data": {
-    "data": [
-      {
-        "value": "US",
-        "count": 8420,
-        "percentage": 54.63,
-        "pageviews": 26891,
-        "pageviews_percentage": 54.96,
-        "bounce_rate": 41.2
-      },
-      {
-        "value": "GB",
-        "count": 2150,
-        "percentage": 13.95,
-        "pageviews": 6847,
-        "pageviews_percentage": 13.99,
-        "bounce_rate": 43.8
-      }
-    ],
-    "totalCount": 87
-  }
-}
-```
-
-#### Pagination Example
-
-```bash
-# Page 1
-GET /api/metric/123?parameter=pathname&limit=50&page=1
-
-# Page 2
-GET /api/metric/123?parameter=pathname&limit=50&page=2
 ```
 
 ---

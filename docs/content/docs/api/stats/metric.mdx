@@ -1,0 +1,157 @@
+---
+title: Get Metric
+description: Retrieve dimensional analytics data broken down by a specific parameter
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+```
+GET /api/metric/:site
+```
+
+Returns dimensional analytics data broken down by a specific parameter. Supports pagination.
+
+## Path Parameters
+
+<TypeTable
+  type={{
+    site: {
+      description: 'Site ID or site identifier',
+      type: 'string | number',
+      required: true,
+    },
+  }}
+/>
+
+## Query Parameters
+
+Accepts all [Common Parameters](/docs/api/stats/guide#common-parameters) plus the following:
+
+<TypeTable
+  type={{
+    parameter: {
+      description: 'The dimension to break down by',
+      type: 'FilterParameter',
+      typeDescription: 'e.g., "pathname", "country", "browser", "event_name"',
+      required: true,
+    },
+    limit: {
+      description: 'Number of results per page',
+      type: 'number',
+      default: 100,
+    },
+    page: {
+      description: 'Page number (1-indexed)',
+      type: 'number',
+      default: 1,
+    },
+  }}
+/>
+
+## Response
+
+<TypeTable
+  type={{
+    data: {
+      description: 'Array of metric results',
+      type: 'MetricItem[]',
+      typeDescription: 'See MetricItem structure below',
+    },
+    totalCount: {
+      description: 'Total number of unique values across all pages',
+      type: 'number',
+    },
+  }}
+/>
+
+### MetricItem Structure
+
+<TypeTable
+  type={{
+    value: {
+      description: 'The dimension value',
+      type: 'string',
+      typeDescription: 'e.g., "/blog", "Chrome", "US"',
+    },
+    count: {
+      description: 'Number of sessions for this value',
+      type: 'number',
+    },
+    percentage: {
+      description: 'Percentage of total sessions',
+      type: 'number',
+      typeDescription: 'Range: 0-100',
+    },
+    pageviews: {
+      description: 'Total pageviews (for page-related parameters)',
+      type: 'number',
+      required: false,
+    },
+    pageviews_percentage: {
+      description: 'Percentage of total pageviews',
+      type: 'number',
+      required: false,
+    },
+    time_on_page_seconds: {
+      description: 'Average time on page (for page-related parameters)',
+      type: 'number',
+      required: false,
+    },
+    bounce_rate: {
+      description: 'Bounce rate percentage',
+      type: 'number',
+      typeDescription: 'Range: 0-100',
+      required: false,
+    },
+    pathname: {
+      description: 'Representative pathname (for page_title parameter)',
+      type: 'string',
+      required: false,
+    },
+  }}
+/>
+
+## Example Request
+
+```bash
+curl -X GET "https://api.rybbit.com/api/metric/123?parameter=country&start_date=2024-01-01&end_date=2024-01-31&time_zone=America/New_York&limit=10&page=1" \
+  -H "Authorization: Bearer your_api_key_here"
+```
+
+## Example Response
+
+```json
+{
+  "data": {
+    "data": [
+      {
+        "value": "US",
+        "count": 8420,
+        "percentage": 54.63,
+        "pageviews": 26891,
+        "pageviews_percentage": 54.96,
+        "bounce_rate": 41.2
+      },
+      {
+        "value": "GB",
+        "count": 2150,
+        "percentage": 13.95,
+        "pageviews": 6847,
+        "pageviews_percentage": 13.99,
+        "bounce_rate": 43.8
+      }
+    ],
+    "totalCount": 87
+  }
+}
+```
+
+## Pagination Example
+
+```bash
+# Page 1
+GET /api/metric/123?parameter=pathname&limit=50&page=1
+
+# Page 2
+GET /api/metric/123?parameter=pathname&limit=50&page=2
+```
