@@ -5,11 +5,7 @@ import { z } from "zod";
 import { deriveKeyOnlySchema } from "./utils.js";
 
 export interface UmamiEvent {
-  // website_id: string; // Ignore
   session_id: string;
-  // visit_id: string; // Ignore
-  // event_id: string; // Ignore
-
   hostname: string;
   browser: string;
   os: string;
@@ -19,32 +15,15 @@ export interface UmamiEvent {
   country: string;
   region: string;
   city: string;
-
   url_path: string;
   url_query: string;
-  // utm_source: string; // Ignore, part of url_query
-  // utm_medium: string; // Ignore, part of url_query
-  // utm_campaign: string; // Ignore, part of url_query
-  // utm_content: string; // Ignore, part of url_query
-  // utm_term: string; // Ignore, part of url_query
   referrer_path: string;
-  // referrer_query: string; // Ignore
   referrer_domain: string;
   page_title: string;
-
-  // gclid: string; // Ignore, part of url_query
-  // fbclid: string; // Ignore, part of url_query
-  // msclkid: string; // Ignore, part of url_query
-  // ttclid: string; // Ignore, part of url_query
-  // li_fat_id: string; // Ignore, part of url_query
-  // twclid: string; // Ignore, part of url_query
-
   event_type: string;
   event_name: string;
-  // tag: string; // Ignore
   distinct_id: string;
   created_at: string;
-  // job_id: string | null; // Ignore
 }
 
 export class UmamiImportMapper {
