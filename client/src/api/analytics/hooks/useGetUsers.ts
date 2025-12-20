@@ -16,7 +16,7 @@ export interface GetUsersOptions {
 }
 
 export function useGetUsers(options: GetUsersOptions) {
-  const { time, site } = useStore();
+  const { time, site, timezone } = useStore();
 
   const { page, pageSize, sortBy, sortOrder, identifiedOnly = false } = options;
   const filteredFilters = getFilteredFilters(USER_PAGE_FILTERS);
@@ -29,7 +29,7 @@ export function useGetUsers(options: GetUsersOptions) {
       pageSize: number;
     }
   >({
-    queryKey: ["users", site, time, page, pageSize, sortBy, sortOrder, filteredFilters, identifiedOnly],
+    queryKey: ["users", site, time, page, pageSize, sortBy, sortOrder, filteredFilters, identifiedOnly, timezone],
     queryFn: async () => {
       const result = await fetchUsers(site, {
         ...params,

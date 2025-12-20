@@ -1,7 +1,14 @@
 import { Filter, FilterParameter, TimeBucket } from "@rybbit/shared";
 import { DateTime } from "luxon";
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import { Time } from "../components/DateSelector/types";
+
+// Get system timezone
+const getSystemTimezone = () =>
+  typeof window !== "undefined"
+    ? Intl.DateTimeFormat().resolvedOptions().timeZone
+    : "UTC";
 
 export type StatType = "pageviews" | "sessions" | "users" | "pages_per_session" | "bounce_rate" | "session_duration";
 
@@ -19,11 +26,15 @@ type Store = {
   setSelectedStat: (stat: StatType) => void;
   filters: Filter[];
   setFilters: (filters: Filter[]) => void;
+  timezone: string;
+  setTimezone: (timezone: string) => void;
 };
 
-export const useStore = create<Store>(set => ({
+export const useStore = create<Store>()(
+  persist(
+    (set) => ({
   site: "",
-  setSite: site => {
+  setSite: (site) => {
     // Get current URL search params to check for stored state
     let urlParams: URLSearchParams | null = null;
     if (typeof window !== "undefined") {
@@ -140,12 +151,26 @@ export const useStore = create<Store>(set => ({
     }
   },
   bucket: "hour",
-  setBucket: bucket => set({ bucket }),
+  setBucket: (bucket) => set({ bucket }),
   selectedStat: "users",
-  setSelectedStat: stat => set({ selectedStat: stat }),
+  setSelectedStat: (stat) => set({ selectedStat: stat }),
   filters: [],
-  setFilters: filters => set({ filters }),
-}));
+  setFilters: (filters) => set({ filters }),
+  timezone: "system",
+  setTimezone: (timezone) => set({ timezone }),
+}),
+    {
+      name: "rybbit-store",
+      partialize: (state) => ({ timezone: state.timezone }),
+    }
+  )
+);
+
+// Helper to get actual timezone value (resolves "system" to actual timezone)
+export const getTimezone = () => {
+  const { timezone } = useStore.getState();
+  return timezone === "system" ? getSystemTimezone() : timezone;
+};
 
 export const resetStore = () => {
   const { setSite, setTime, setBucket, setSelectedStat, setFilters } = useStore.getState();

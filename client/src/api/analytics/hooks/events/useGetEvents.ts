@@ -1,9 +1,8 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { Time } from "../../../../components/DateSelector/types";
-import { useStore } from "../../../../lib/store";
+import { getTimezone, useStore } from "../../../../lib/store";
 import { buildApiParams } from "../../../utils";
 import { EventsResponse, fetchEvents } from "../../endpoints";
-import { timeZone } from "../../../../lib/dateTimeUtils";
 
 export interface GetEventsOptions {
   time?: Time;
@@ -14,16 +13,16 @@ export interface GetEventsOptions {
 }
 
 export function useGetEvents(count = 10) {
-  const { site } = useStore();
+  const { site, timezone } = useStore();
 
   return useQuery({
-    queryKey: ["events", site, count],
+    queryKey: ["events", site, count, timezone],
     refetchInterval: 5000,
     queryFn: () =>
       fetchEvents(site, {
         startDate: "",
         endDate: "",
-        timeZone,
+        timeZone: getTimezone(),
         limit: count,
       }).then(res => res.data),
     enabled: !!site,
@@ -32,7 +31,7 @@ export function useGetEvents(count = 10) {
 
 // Hook with pagination and filtering support
 export function useGetEventsInfinite(options: GetEventsOptions = {}) {
-  const { site, time, filters } = useStore();
+  const { site, time, filters, timezone } = useStore();
   const pageSize = options.pageSize || 20;
 
   const params = buildApiParams(time, {
@@ -40,7 +39,7 @@ export function useGetEventsInfinite(options: GetEventsOptions = {}) {
   });
 
   return useInfiniteQuery<EventsResponse, Error>({
-    queryKey: ["events-infinite", site, time, filters, pageSize, options.isRealtime],
+    queryKey: ["events-infinite", site, time, filters, pageSize, options.isRealtime, timezone],
     initialPageParam: 1,
     queryFn: async ({ pageParam }) => {
       return fetchEvents(site, {

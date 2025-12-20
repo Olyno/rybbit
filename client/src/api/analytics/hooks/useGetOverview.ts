@@ -14,14 +14,14 @@ type UseGetOverviewOptions = {
 };
 
 export function useGetOverview({ periodTime, site, overrideTime }: UseGetOverviewOptions) {
-  const { time, previousTime, filters } = useStore();
+  const { time, previousTime, filters, timezone } = useStore();
 
   // Use overrideTime if provided, otherwise use store time
   const baseTime = overrideTime || time;
   const timeToUse = periodTime === "previous" ? previousTime : baseTime;
 
   const params = buildApiParams(timeToUse, { filters });
-  const queryKey = ["overview", timeToUse, site, filters];
+  const queryKey = ["overview", timeToUse, site, filters, timezone];
 
   return useQuery({
     queryKey,

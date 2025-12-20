@@ -3,8 +3,7 @@ import { DateTime } from "luxon";
 import { Time } from "../components/DateSelector/types";
 import axios, { AxiosRequestConfig } from "axios";
 import { BACKEND_URL } from "../lib/const";
-import { timeZone } from "../lib/dateTimeUtils";
-import { useStore } from "../lib/store";
+import { getTimezone, useStore } from "../lib/store";
 import { CommonApiParams } from "./analytics/endpoints/types";
 
 export function getStartAndEndDate(time: Time): { startDate: string | null; endDate: string | null } {
@@ -40,6 +39,8 @@ export function getStartAndEndDate(time: Time): { startDate: string | null; endD
  * This centralizes the logic for converting Time to API params across all hooks.
  */
 export function buildApiParams(time: Time, options: { filters?: Filter[] } = {}): CommonApiParams {
+  const timeZone = getTimezone();
+
   if (time.mode === "past-minutes") {
     return {
       startDate: "",

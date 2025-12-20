@@ -18,12 +18,12 @@ export type GSCData = {
  * Hook to fetch data from Google Search Console for a specific dimension
  */
 export function useGSCData(dimension: GSCDimension) {
-  const { site, time } = useStore();
+  const { site, time, timezone } = useStore();
 
   const timeParams = toQueryParams(buildApiParams(time));
 
   return useQuery({
-    queryKey: ["gsc-data", dimension, site, timeParams],
+    queryKey: ["gsc-data", dimension, site, timeParams, timezone],
     enabled: !!site,
     queryFn: () => {
       return authedFetch<{ data: GSCData[] }>(`/gsc/data/${site}`, {

@@ -26,7 +26,7 @@ export function useGetOverviewBucketed({
     | { mode: "range"; startDate: string; endDate: string };
   props?: Partial<UseQueryOptions<APIResponse<GetOverviewBucketedResponse>>>;
 }): UseQueryResult<APIResponse<GetOverviewBucketedResponse>> {
-  const { time, previousTime, filters: globalFilters } = useStore();
+  const { time, previousTime, filters: globalFilters, timezone } = useStore();
 
   // Use overrideTime if provided, otherwise use store time
   const baseTime = overrideTime || time;
@@ -43,8 +43,9 @@ export function useGetOverviewBucketed({
           site,
           bucket,
           combinedFilters,
+          timezone,
         ]
-      : ["overview-bucketed", timeToUse, bucket, site, combinedFilters];
+      : ["overview-bucketed", timeToUse, bucket, site, combinedFilters, timezone];
 
   const params = buildApiParams(timeToUse, { filters: combinedFilters });
 

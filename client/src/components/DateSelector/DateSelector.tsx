@@ -5,9 +5,14 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Calendar, Check } from "lucide-react";
+import { getTimezoneLabel, timezones } from "@/lib/dateTimeUtils";
+import { useStore } from "@/lib/store";
+import { Calendar, Check, Globe } from "lucide-react";
 import { DateTime } from "luxon";
 import { CustomDateRangePicker } from "./CustomDateRangePicker";
 import { Time } from "./types";
@@ -102,6 +107,8 @@ export function DateSelector({
   setTime: (time: Time) => void;
   pastMinutesEnabled?: boolean;
 }) {
+  const { timezone, setTimezone } = useStore();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger size={"sm"}>
@@ -117,10 +124,9 @@ export function DateSelector({
               wellKnown: "today",
             })
           }
+          className="w-48"
         >
-          <div className="w-4">
-            {time.wellKnown === "today" && <Check className="w-4 h-4" />}
-          </div>
+          <div className="w-4">{time.wellKnown === "today" && <Check className="w-4 h-4" />}</div>
           Today
         </DropdownMenuItem>
         <DropdownMenuItem
@@ -133,9 +139,7 @@ export function DateSelector({
             })
           }
         >
-          <div className="w-4">
-            {time.wellKnown === "last-3-days" && <Check className="w-4 h-4" />}
-          </div>
+          <div className="w-4">{time.wellKnown === "last-3-days" && <Check className="w-4 h-4" />}</div>
           Last 3 Days
         </DropdownMenuItem>
         <DropdownMenuItem
@@ -148,9 +152,7 @@ export function DateSelector({
             })
           }
         >
-          <div className="w-4">
-            {time.wellKnown === "last-7-days" && <Check className="w-4 h-4" />}
-          </div>
+          <div className="w-4">{time.wellKnown === "last-7-days" && <Check className="w-4 h-4" />}</div>
           Last 7 Days
         </DropdownMenuItem>
         <DropdownMenuItem
@@ -163,9 +165,7 @@ export function DateSelector({
             })
           }
         >
-          <div className="w-4">
-            {time.wellKnown === "last-14-days" && <Check className="w-4 h-4" />}
-          </div>
+          <div className="w-4">{time.wellKnown === "last-14-days" && <Check className="w-4 h-4" />}</div>
           Last 14 Days
         </DropdownMenuItem>
         <DropdownMenuItem
@@ -178,9 +178,7 @@ export function DateSelector({
             })
           }
         >
-          <div className="w-4">
-            {time.wellKnown === "last-30-days" && <Check className="w-4 h-4" />}
-          </div>
+          <div className="w-4">{time.wellKnown === "last-30-days" && <Check className="w-4 h-4" />}</div>
           Last 30 Days
         </DropdownMenuItem>
         <DropdownMenuItem
@@ -193,9 +191,7 @@ export function DateSelector({
             })
           }
         >
-          <div className="w-4">
-            {time.wellKnown === "last-60-days" && <Check className="w-4 h-4" />}
-          </div>
+          <div className="w-4">{time.wellKnown === "last-60-days" && <Check className="w-4 h-4" />}</div>
           Last 60 Days
         </DropdownMenuItem>
         {pastMinutesEnabled && (
@@ -211,9 +207,7 @@ export function DateSelector({
                 })
               }
             >
-              <div className="w-4">
-                {time.wellKnown === "last-30-minutes" && <Check className="w-4 h-4" />}
-              </div>
+              <div className="w-4">{time.wellKnown === "last-30-minutes" && <Check className="w-4 h-4" />}</div>
               Last 30 Minutes
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -226,9 +220,7 @@ export function DateSelector({
                 })
               }
             >
-              <div className="w-4">
-                {time.wellKnown === "last-1-hour" && <Check className="w-4 h-4" />}
-              </div>
+              <div className="w-4">{time.wellKnown === "last-1-hour" && <Check className="w-4 h-4" />}</div>
               Last 1 Hour
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -241,9 +233,7 @@ export function DateSelector({
                 })
               }
             >
-              <div className="w-4">
-                {time.wellKnown === "last-6-hours" && <Check className="w-4 h-4" />}
-              </div>
+              <div className="w-4">{time.wellKnown === "last-6-hours" && <Check className="w-4 h-4" />}</div>
               Last 6 Hours
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -256,9 +246,7 @@ export function DateSelector({
                 })
               }
             >
-              <div className="w-4">
-                {time.wellKnown === "last-24-hours" && <Check className="w-4 h-4" />}
-              </div>
+              <div className="w-4">{time.wellKnown === "last-24-hours" && <Check className="w-4 h-4" />}</div>
               Last 24 Hours
             </DropdownMenuItem>
           </>
@@ -273,9 +261,7 @@ export function DateSelector({
             })
           }
         >
-          <div className="w-4">
-            {time.wellKnown === "this-week" && <Check className="w-4 h-4" />}
-          </div>
+          <div className="w-4">{time.wellKnown === "this-week" && <Check className="w-4 h-4" />}</div>
           This Week
         </DropdownMenuItem>
         <DropdownMenuItem
@@ -287,9 +273,7 @@ export function DateSelector({
             })
           }
         >
-          <div className="w-4">
-            {time.wellKnown === "this-month" && <Check className="w-4 h-4" />}
-          </div>
+          <div className="w-4">{time.wellKnown === "this-month" && <Check className="w-4 h-4" />}</div>
           This Month
         </DropdownMenuItem>
         <DropdownMenuItem
@@ -301,9 +285,7 @@ export function DateSelector({
             })
           }
         >
-          <div className="w-4">
-            {time.wellKnown === "this-year" && <Check className="w-4 h-4" />}
-          </div>
+          <div className="w-4">{time.wellKnown === "this-year" && <Check className="w-4 h-4" />}</div>
           This Year
         </DropdownMenuItem>
         <DropdownMenuItem
@@ -314,13 +296,28 @@ export function DateSelector({
             })
           }
         >
-          <div className="w-4">
-            {time.wellKnown === "all-time" && <Check className="w-4 h-4" />}
-          </div>
+          <div className="w-4">{time.wellKnown === "all-time" && <Check className="w-4 h-4" />}</div>
           All Time
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <CustomDateRangePicker setTime={setTime} time={time} />
+        <DropdownMenuSeparator />
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <div className="w-4">
+              <Globe className="w-4 h-4" />
+            </div>
+            {getTimezoneLabel(timezone)}
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            {timezones.map(tz => (
+              <DropdownMenuItem key={tz.value} onClick={() => setTimezone(tz.value)}>
+                <div className="w-4">{timezone === tz.value && <Check className="w-4 h-4" />}</div>
+                {tz.label}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
       </DropdownMenuContent>
     </DropdownMenu>
   );
