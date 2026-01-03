@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Used for disabled signup view
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -49,6 +50,7 @@ function SignupPageContent() {
   // Step 2: Organization creation
   const [orgName, setOrgName] = useState("");
   const [orgSlug, setOrgSlug] = useState("");
+  const [referralSource, setReferralSource] = useState("");
 
   // Step 3: Website addition
   const [organizationId, setOrganizationId] = useState("");
@@ -137,6 +139,11 @@ function SignupPageContent() {
       });
 
       setOrganizationId(data.id);
+
+      // Track how user found Rybbit
+      if (IS_CLOUD && referralSource) {
+        window.rybbit?.event("found", { via: referralSource });
+      }
 
       setCurrentStep(3);
     } catch (error) {
@@ -253,6 +260,32 @@ function SignupPageContent() {
                 />
               </div>
 
+              {IS_CLOUD && (
+                <div className="space-y-2">
+                  <Label htmlFor="referralSource">How did you find Rybbit?</Label>
+                  <Select value={referralSource} onValueChange={setReferralSource}>
+                    <SelectTrigger className="h-10 bg-neutral-100 dark:bg-neutral-800/50 border-neutral-200 dark:border-neutral-700">
+                      <SelectValue placeholder="Select an option" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="google">Google</SelectItem>
+                      <SelectItem value="reddit">Reddit</SelectItem>
+                      <SelectItem value="twitter">Twitter/X</SelectItem>
+                      <SelectItem value="youtube">YouTube</SelectItem>
+                      <SelectItem value="linkedin">LinkedIn</SelectItem>
+                      <SelectItem value="discord">Discord</SelectItem>
+                      <SelectItem value="producthunt">Product Hunt</SelectItem>
+                      <SelectItem value="hacker-news">Hacker News</SelectItem>
+                      <SelectItem value="github">Github</SelectItem>
+                      <SelectItem value="friends">Friends</SelectItem>
+                      <SelectItem value="work">Work</SelectItem>
+                      <SelectItem value="blog">Blog</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
               {/* <div className="space-y-2">
                 <Label htmlFor="orgSlug">Organization Slug</Label>
                 <Input
@@ -277,7 +310,7 @@ function SignupPageContent() {
                 <Button
                   className="w-full transition-all duration-300 h-11 bg-emerald-600 hover:bg-emerald-500 text-white"
                   onClick={handleOrganizationSubmit}
-                  disabled={isLoading || !orgName || !orgSlug}
+                  disabled={isLoading || !orgName || !orgSlug || (IS_CLOUD && !referralSource)}
                   variant="success"
                 >
                   Continue
