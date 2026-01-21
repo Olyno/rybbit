@@ -18,12 +18,18 @@ export function useGetSessions({
   limit = 100,
   identifiedOnly = false,
   timeOverride,
+  minPageviews,
+  minEvents,
+  minDuration,
 }: {
   userId?: string;
   page?: number;
   limit?: number;
   identifiedOnly?: boolean;
   timeOverride?: Time;
+  minPageviews?: number;
+  minEvents?: number;
+  minDuration?: number;
 }) {
   const { time, site, timezone } = useStore();
 
@@ -36,7 +42,7 @@ export function useGetSessions({
     : buildApiParams(timeOverride || time, { filters: filteredFilters });
 
   return useQuery<{ data: GetSessionsResponse }>({
-    queryKey: ["sessions", timeOverride || time, site, filteredFilters, userId, page, limit, identifiedOnly, timezone],
+    queryKey: ["sessions", timeOverride || time, site, filteredFilters, userId, page, limit, identifiedOnly, timezone, minPageviews, minEvents, minDuration],
     queryFn: () => {
       return fetchSessions(site, {
         ...params,
@@ -44,6 +50,9 @@ export function useGetSessions({
         limit,
         userId,
         identifiedOnly,
+        minPageviews,
+        minEvents,
+        minDuration,
       });
     },
     staleTime: Infinity,

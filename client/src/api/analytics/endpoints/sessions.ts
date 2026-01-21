@@ -113,6 +113,9 @@ export type LiveSessionLocation = {
 export interface SessionsParams extends CommonApiParams, PaginationParams {
   userId?: string;
   identifiedOnly?: boolean;
+  minPageviews?: number;
+  minEvents?: number;
+  minDuration?: number;
 }
 
 export interface SessionDetailsParams {
@@ -136,6 +139,9 @@ export async function fetchSessions(
     limit: params.limit,
     user_id: params.userId,
     identified_only: params.identifiedOnly,
+    min_pageviews: params.minPageviews,
+    min_events: params.minEvents,
+    min_duration: params.minDuration,
   };
 
   const response = await authedFetch<{ data: GetSessionsResponse }>(

@@ -54,6 +54,9 @@ export interface GetSessionsRequest {
     page: number;
     user_id?: string;
     identified_only?: string;
+    min_pageviews?: string;
+    min_events?: string;
+    min_duration?: string;
   }>;
 }
 
@@ -67,9 +70,21 @@ const SESSION_FIELD_MAPPINGS = {
 };
 
 export async function getSessions(req: FastifyRequest<GetSessionsRequest>, res: FastifyReply) {
-  const { filters, page = 1, user_id: userId, limit = 100, identified_only: identifiedOnly = "false" } = req.query;
+  const {
+    filters,
+    page = 1,
+    user_id: userId,
+    limit = 100,
+    identified_only: identifiedOnly = "false",
+    min_pageviews: minPageviewsStr,
+    min_events: minEventsStr,
+    min_duration: minDurationStr,
+  } = req.query;
   const site = req.params.siteId;
   const filterIdentified = identifiedOnly === "true";
+  const minPageviews = minPageviewsStr ? parseInt(minPageviewsStr, 10) : undefined;
+  const minEvents = minEventsStr ? parseInt(minEventsStr, 10) : undefined;
+  const minDuration = minDurationStr ? parseInt(minDurationStr, 10) : undefined;
 
   const timeStatement = getTimeStatement(req.query);
 
@@ -141,6 +156,9 @@ export async function getSessions(req: FastifyRequest<GetSessionsRequest>, res: 
   LEFT JOIN ReplaySessions r ON a.session_id = r.session_id
   WHERE 1 = 1 ${filterStatement}
   ${filterIdentified ? "AND a.identified_user_id != ''" : ""}
+  ${minPageviews !== undefined ? "AND a.pageviews >= {minPageviews:Int32}" : ""}
+  ${minEvents !== undefined ? "AND a.events >= {minEvents:Int32}" : ""}
+  ${minDuration !== undefined ? "AND a.session_duration >= {minDuration:Int32}" : ""}
   LIMIT {limit:Int32} OFFSET {offset:Int32}
   `;
 
@@ -153,6 +171,9 @@ export async function getSessions(req: FastifyRequest<GetSessionsRequest>, res: 
         user_id: userId,
         limit: limit || 100,
         offset: (page - 1) * (limit || 100),
+        minPageviews: minPageviews ?? 0,
+        minEvents: minEvents ?? 0,
+        minDuration: minDuration ?? 0,
       },
     });
 
