@@ -99,26 +99,12 @@ const PlatformLogo = ({ name, icon: Icon, path }: { name: string; icon: Componen
   );
 };
 
-export function Integrations() {
+export function IntegrationsGrid() {
   return (
-    <section className="py-12 md:py-20 w-full">
-      <div className="max-w-[1200px] mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-8 md:gap-16">
-          <div className="md:sticky md:top-24 md:self-start">
-            <SectionBadge className="mb-4">Seamless Integration</SectionBadge>
-            <h2 className="text-3xl md:text-4xl font-bold">Works with all your favorite platforms</h2>
-            <p className="mt-4 text-neutral-600 dark:text-neutral-300 font-light">
-              Integrate Rybbit with any platform in minutes
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-5">
-            {platforms.map((platform) => (
-              <PlatformLogo key={platform.name} {...platform} />
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
+    <div className="flex flex-wrap gap-5">
+      {platforms.map((platform) => (
+        <PlatformLogo key={platform.name} {...platform} />
+      ))}
+    </div>
   );
 }
