@@ -74,6 +74,12 @@ const sponsors: Sponsor[] = [
     url: "https://fastscribe.io",
     amount: 10,
   },
+  {
+    name: "Ark",
+    logo: "/sponsors/arkhq.png",
+    url: "https://arkhq.io",
+    amount: 10,
+  },
 ];
 
 export default function SponsorsPage() {
