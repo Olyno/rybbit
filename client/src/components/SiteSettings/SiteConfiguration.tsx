@@ -70,6 +70,9 @@ export function SiteConfiguration({ siteMetadata, disabled = false, onClose }: S
     trackInitialPageView: siteMetadata.trackInitialPageView ?? true,
     trackSpaNavigation: siteMetadata.trackSpaNavigation ?? true,
     trackIp: siteMetadata.trackIp ?? false,
+    trackButtonClicks: siteMetadata.trackButtonClicks ?? false,
+    trackCopy: siteMetadata.trackCopy ?? false,
+    trackFormInteractions: siteMetadata.trackFormInteractions ?? false,
   });
 
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
@@ -183,64 +186,52 @@ export function SiteConfiguration({ siteMetadata, disabled = false, onClose }: S
   const { data: subscription, isLoading: isSubscriptionLoading } = useStripeSubscription();
 
   const sessionReplayDisabled = !subscription?.isPro && IS_CLOUD;
-  const webVitalsDisabled = subscription?.status !== "active" && IS_CLOUD;
-  const trackErrorsDisabled = subscription?.status !== "active" && IS_CLOUD;
+  const standardFeaturesDisabled = subscription?.status !== "active" && IS_CLOUD;
 
   // Configuration for analytics feature toggles
   const analyticsToggles: ToggleConfig[] = [
     ...(!subscription?.planName?.startsWith("appsumo") && !isSubscriptionLoading
       ? [
-          {
-            id: "sessionReplay",
-            label: "Session Replay",
-            description: "Record and replay user sessions to understand user behavior",
-            value: toggleStates.sessionReplay,
-            key: "sessionReplay",
-            enabledMessage: "Session replay enabled",
-            disabledMessage: "Session replay disabled",
-            disabled: sessionReplayDisabled,
-            badge: <Badge variant="success">Pro</Badge>,
-          } as ToggleConfig,
-        ]
+        {
+          id: "sessionReplay",
+          label: "Session Replay",
+          description: "Record and replay user sessions to understand user behavior",
+          value: toggleStates.sessionReplay,
+          key: "sessionReplay",
+          enabledMessage: "Session replay enabled",
+          disabledMessage: "Session replay disabled",
+          disabled: sessionReplayDisabled,
+          badge: <Badge variant="success">Pro</Badge>,
+        } as ToggleConfig,
+      ]
       : []),
     ...(IS_CLOUD
       ? [
-          {
-            id: "webVitals",
-            label: "Web Vitals",
-            description: "Track Core Web Vitals metrics (LCP, CLS, INP, FCP, TTFB)",
-            value: toggleStates.webVitals,
-            key: "webVitals" as keyof SiteResponse,
-            enabledMessage: "Web Vitals enabled",
-            disabledMessage: "Web Vitals disabled",
-            disabled: webVitalsDisabled,
-            badge: <Badge variant="success">Standard</Badge>,
-          } as ToggleConfig,
-        ]
+        {
+          id: "webVitals",
+          label: "Web Vitals",
+          description: "Track Core Web Vitals metrics (LCP, CLS, INP, FCP, TTFB)",
+          value: toggleStates.webVitals,
+          key: "webVitals" as keyof SiteResponse,
+          enabledMessage: "Web Vitals enabled",
+          disabledMessage: "Web Vitals disabled",
+          disabled: standardFeaturesDisabled,
+          badge: <Badge variant="success">Standard</Badge>,
+        } as ToggleConfig,
+      ]
       : []),
     {
-      id: "trackErrors",
-      label: "Error Tracking",
-      description: "Capture JavaScript errors and exceptions from your site",
-      value: toggleStates.trackErrors,
-      key: "trackErrors",
-      enabledMessage: "Error tracking enabled",
-      disabledMessage: "Error tracking disabled",
-      disabled: trackErrorsDisabled,
-      badge: <Badge variant="success">Standard</Badge>,
-    },
-    {
-      id: "trackOutbound",
-      label: "Track Outbound Links",
-      description: "Track when users click on external links",
-      value: toggleStates.trackOutbound,
-      key: "trackOutbound",
-      enabledMessage: "Outbound tracking enabled",
-      disabledMessage: "Outbound tracking disabled",
+      id: "trackSpaNavigation",
+      label: "SPA Navigation",
+      description: "Automatically track navigation in single-page applications",
+      value: toggleStates.trackSpaNavigation,
+      key: "trackSpaNavigation",
+      enabledMessage: "SPA navigation tracking enabled",
+      disabledMessage: "SPA navigation tracking disabled",
     },
     {
       id: "trackUrlParams",
-      label: "Track URL Parameters",
+      label: "URL Parameters",
       description: "Include query string parameters in page tracking",
       value: toggleStates.trackUrlParams,
       key: "trackUrlParams",
@@ -249,21 +240,68 @@ export function SiteConfiguration({ siteMetadata, disabled = false, onClose }: S
     },
     {
       id: "trackInitialPageView",
-      label: "Track Initial Page View",
+      label: "Initial Page View",
       description: "Automatically track the first page view when the script loads",
       value: toggleStates.trackInitialPageView,
       key: "trackInitialPageView",
       enabledMessage: "Initial page view tracking enabled",
       disabledMessage: "Initial page view tracking disabled",
     },
+  ];
+
+  const autoCaptureToggles: ToggleConfig[] = [
     {
-      id: "trackSpaNavigation",
-      label: "Track SPA Navigation",
-      description: "Automatically track navigation in single-page applications",
-      value: toggleStates.trackSpaNavigation,
-      key: "trackSpaNavigation",
-      enabledMessage: "SPA navigation tracking enabled",
-      disabledMessage: "SPA navigation tracking disabled",
+      id: "trackOutbound",
+      label: "Outbound Links",
+      description: "Track when users click on external links",
+      value: toggleStates.trackOutbound,
+      key: "trackOutbound",
+      enabledMessage: "Outbound tracking enabled",
+      disabledMessage: "Outbound tracking disabled",
+    },
+    {
+      id: "trackErrors",
+      label: "Error Tracking",
+      description: "Capture JavaScript errors and exceptions from your site",
+      value: toggleStates.trackErrors,
+      key: "trackErrors",
+      enabledMessage: "Error tracking enabled",
+      disabledMessage: "Error tracking disabled",
+      disabled: standardFeaturesDisabled,
+      badge: <Badge variant="success">Standard</Badge>,
+    },
+    {
+      id: "trackButtonClicks",
+      label: "Button Clicks",
+      description: "Automatically track clicks on all buttons",
+      value: toggleStates.trackButtonClicks,
+      key: "trackButtonClicks",
+      enabledMessage: "Button click tracking enabled",
+      disabledMessage: "Button click tracking disabled",
+      disabled: standardFeaturesDisabled,
+      badge: <Badge variant="success">Standard</Badge>,
+    },
+    {
+      id: "trackCopy",
+      label: "Copy Events",
+      description: "Track when users copy text from your site",
+      value: toggleStates.trackCopy,
+      key: "trackCopy",
+      enabledMessage: "Copy tracking enabled",
+      disabledMessage: "Copy tracking disabled",
+      disabled: standardFeaturesDisabled,
+      badge: <Badge variant="success">Standard</Badge>,
+    },
+    {
+      id: "trackFormInteractions",
+      label: "Form Interactions",
+      description: "Automatically track form submissions and input/select changes",
+      value: toggleStates.trackFormInteractions,
+      key: "trackFormInteractions",
+      enabledMessage: "Form interaction tracking enabled",
+      disabledMessage: "Form interaction tracking disabled",
+      disabled: standardFeaturesDisabled,
+      badge: <Badge variant="success">Standard</Badge>,
     },
   ];
 
@@ -299,22 +337,12 @@ export function SiteConfiguration({ siteMetadata, disabled = false, onClose }: S
 
   return (
     <div className="pt-4 pb-6 space-y-6 max-h-[70vh] overflow-y-auto">
-      {/* Privacy & Security Settings */}
       <div className="space-y-4">{renderToggleSection(privacyToggles, "Privacy & Security")}</div>
-
-      {/* Analytics Features */}
       <div className="space-y-4">{renderToggleSection(analyticsToggles, "Analytics Features")}</div>
-
-      {/* IP Exclusions Section */}
+      <div className="space-y-4">{renderToggleSection(autoCaptureToggles, "Auto Capture")}</div>
       <IPExclusionManager siteId={siteMetadata.siteId} disabled={disabled} />
-
-      {/* Country Exclusions Section */}
       <CountryExclusionManager siteId={siteMetadata.siteId} disabled={disabled} />
-
-      {/* Google Search Console Section */}
       {IS_CLOUD && <GSCManager disabled={disabled} />}
-
-      {/* Domain Settings Section */}
       <div className="space-y-3">
         <div>
           <h4 className="text-sm font-semibold text-foreground">Change Domain</h4>

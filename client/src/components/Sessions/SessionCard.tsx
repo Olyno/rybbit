@@ -142,7 +142,7 @@ export function SessionCard({ session, onClick, userId, expandedByDefault }: Ses
               <TooltipTrigger asChild>
                 <Badge className="flex items-center gap-1 bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300">
                   <EventIcon />
-                  <span>{formatter(session.events)}</span>
+                  <span>{formatter(session.events + (session.button_clicks || 0) + (session.copies || 0) + (session.form_submits || 0) + (session.input_changes || 0))}</span>
                 </Badge>
               </TooltipTrigger>
               <TooltipContent>Events</TooltipContent>
@@ -226,7 +226,7 @@ export function SessionCard({ session, onClick, userId, expandedByDefault }: Ses
               <TooltipTrigger asChild>
                 <Badge className="flex items-center gap-1 bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300">
                   <EventIcon />
-                  <span>{formatter(session.events)}</span>
+                  <span>{formatter(session.events + (session.button_clicks || 0) + (session.copies || 0) + (session.form_submits || 0) + (session.input_changes || 0))}</span>
                 </Badge>
               </TooltipTrigger>
               <TooltipContent>Events</TooltipContent>

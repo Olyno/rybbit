@@ -1,4 +1,4 @@
-import { BasePayload, ScriptConfig, TrackingPayload, WebVitalsData, SessionReplayBatch } from "./types.js";
+import { BasePayload, ScriptConfig, TrackingPayload, WebVitalsData, SessionReplayBatch, ButtonClickProperties, CopyProperties, FormSubmitProperties, InputChangeProperties } from "./types.js";
 import { findMatchingPattern } from "./utils.js";
 import { SessionReplayRecorder } from "./sessionReplay.js";
 
@@ -121,12 +121,12 @@ export class Tracker {
       return; // Skip tracking
     }
 
+    const typesWithProperties = ["custom_event", "outbound", "error", "button_click", "copy", "form_submit", "input_change"];
     const payload: TrackingPayload = {
       ...basePayload,
       type: eventType,
       event_name: eventName,
-      properties:
-        eventType === "custom_event" || eventType === "outbound" || eventType === "error"
+      properties: typesWithProperties.includes(eventType)
           ? JSON.stringify(properties)
           : undefined,
     };
@@ -226,6 +226,22 @@ export class Tracker {
     }
 
     this.track("error", error.name || "Error", errorProperties);
+  }
+
+  trackButtonClick(properties: ButtonClickProperties): void {
+    this.track("button_click", "", properties);
+  }
+
+  trackCopy(properties: CopyProperties): void {
+    this.track("copy", "", properties);
+  }
+
+  trackFormSubmit(properties: FormSubmitProperties): void {
+    this.track("form_submit", "", properties);
+  }
+
+  trackInputChange(properties: InputChangeProperties): void {
+    this.track("input_change", "", properties);
   }
 
   identify(userId: string, traits?: Record<string, unknown>): void {

@@ -9,6 +9,7 @@
     "script",
     "script-troubleshooting",
     "track-events",
+    "autocapture",
     "identify-users",
     "guides",
     "proxy-guide",

@@ -1,6 +1,9 @@
 import { parseScriptConfig } from "./config.js";
 import { Tracker } from "./tracking.js";
 import { WebVitalsCollector } from "./webVitals.js";
+import { ClickTrackingManager } from "./clickTracking.js";
+import { CopyTrackingManager } from "./copyTracking.js";
+import { FormTrackingManager } from "./formTracking.js";
 import { debounce, isOutboundLink } from "./utils.js";
 import { RybbitAPI, WebVitalsData, ErrorProperties } from "./types.js";
 
@@ -57,6 +60,29 @@ declare global {
       tracker.trackWebVitals(vitals);
     });
     webVitalsCollector.initialize();
+  }
+
+  // Declare managers in outer scope so cleanup can access them
+  let clickManager: ClickTrackingManager | null = null;
+  let copyManager: CopyTrackingManager | null = null;
+  let formManager: FormTrackingManager | null = null;
+
+  // Initialize click tracking if enabled
+  if (config.trackButtonClicks) {
+    clickManager = new ClickTrackingManager(tracker, config);
+    clickManager.initialize();
+  }
+
+  // Initialize copy tracking if enabled
+  if (config.trackCopy) {
+    copyManager = new CopyTrackingManager(tracker);
+    copyManager.initialize();
+  }
+
+  // Initialize form interaction tracking if enabled
+  if (config.trackFormInteractions) {
+    formManager = new FormTrackingManager(tracker, config);
+    formManager.initialize();
   }
 
   // Initialize error tracking if enabled
@@ -167,6 +193,8 @@ declare global {
 
   // Setup cleanup on page unload
   window.addEventListener("beforeunload", () => {
+    clickManager?.cleanup();
+    copyManager?.cleanup();
     tracker.cleanup();
   });
 

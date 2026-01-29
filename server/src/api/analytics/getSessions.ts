@@ -39,6 +39,10 @@ export type GetSessionsResponse = {
   events: number;
   errors: number;
   outbound: number;
+  button_clicks: number;
+  copies: number;
+  form_submits: number;
+  input_changes: number;
   ip: string;
   lat: number;
   lon: number;
@@ -130,6 +134,10 @@ export async function getSessions(req: FastifyRequest<GetSessionsRequest>, res: 
           countIf(type = 'custom_event') AS events,
           countIf(type = 'error') AS errors,
           countIf(type = 'outbound') AS outbound,
+          countIf(type = 'button_click') AS button_clicks,
+          countIf(type = 'copy') AS copies,
+          countIf(type = 'form_submit') AS form_submits,
+          countIf(type = 'input_change') AS input_changes,
           argMax(ip, timestamp) AS ip,
           argMax(lat, timestamp) AS lat,
           argMax(lon, timestamp) AS lon

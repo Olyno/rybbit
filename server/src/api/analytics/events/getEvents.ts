@@ -54,7 +54,7 @@ export async function getEvents(req: FastifyRequest<GetEventsRequest>, res: Fast
       FROM events
       WHERE
         site_id = {siteId:Int32}
-        AND (type = 'custom_event' OR type = 'pageview' OR type = 'outbound')
+        AND type IN ('custom_event', 'pageview', 'outbound', 'button_click', 'copy', 'form_submit', 'input_change')
         ${timeStatement}
         ${filterStatement}
     `;
@@ -90,7 +90,7 @@ export async function getEvents(req: FastifyRequest<GetEventsRequest>, res: Fast
       FROM events
       WHERE
         site_id = {siteId:Int32}
-        AND (type = 'custom_event' OR type = 'pageview' OR type = 'outbound')
+        AND type IN ('custom_event', 'pageview', 'outbound', 'button_click', 'copy', 'form_submit', 'input_change')
         ${timeStatement}
         ${filterStatement}
       ORDER BY timestamp DESC

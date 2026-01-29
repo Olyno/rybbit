@@ -37,6 +37,10 @@ export type GetSessionsResponse = {
   events: number;
   errors: number;
   outbound: number;
+  button_clicks: number;
+  copies: number;
+  form_submits: number;
+  input_changes: number;
   ip: string;
   lat: number;
   lon: number;

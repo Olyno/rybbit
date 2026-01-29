@@ -146,6 +146,92 @@ export const trackingPayloadSchema = z.discriminatedUnion("type", [
         ),
     })
     .strict(),
+  z
+    .object({
+      type: z.literal("button_click"),
+      ...baseEventFields,
+      event_name: z.string().max(256).optional(),
+      properties: jsonStringRefine("Properties must be valid JSON"),
+    })
+    .strict(),
+  z
+    .object({
+      type: z.literal("copy"),
+      ...baseEventFields,
+      event_name: z.string().max(256).optional(),
+      properties: z
+        .string()
+        .max(2048)
+        .refine(
+          val => {
+            try {
+              const parsed = JSON.parse(val);
+              if (typeof parsed.textLength !== "number" || parsed.textLength < 0) return false;
+              if (typeof parsed.sourceElement !== "string") return false;
+              return true;
+            } catch {
+              return false;
+            }
+          },
+          {
+            message: "Properties must be valid JSON with copy fields (textLength>=0, sourceElement required)",
+          }
+        ),
+    })
+    .strict(),
+  z
+    .object({
+      type: z.literal("form_submit"),
+      ...baseEventFields,
+      event_name: z.string().max(256).optional(),
+      properties: z
+        .string()
+        .max(2048)
+        .refine(
+          val => {
+            try {
+              const parsed = JSON.parse(val);
+              if (typeof parsed.formId !== "string") return false;
+              if (typeof parsed.formName !== "string") return false;
+              if (typeof parsed.formAction !== "string") return false;
+              if (typeof parsed.method !== "string") return false;
+              if (typeof parsed.fieldCount !== "number" || parsed.fieldCount < 0) return false;
+              return true;
+            } catch {
+              return false;
+            }
+          },
+          {
+            message: "Properties must be valid JSON with form_submit fields (formId, formName, formAction, method, fieldCount required)",
+          }
+        ),
+    })
+    .strict(),
+  z
+    .object({
+      type: z.literal("input_change"),
+      ...baseEventFields,
+      event_name: z.string().max(256).optional(),
+      properties: z
+        .string()
+        .max(2048)
+        .refine(
+          val => {
+            try {
+              const parsed = JSON.parse(val);
+              if (typeof parsed.element !== "string") return false;
+              if (typeof parsed.inputName !== "string") return false;
+              return true;
+            } catch {
+              return false;
+            }
+          },
+          {
+            message: "Properties must be valid JSON with input_change fields (element, inputName required)",
+          }
+        ),
+    })
+    .strict(),
 ]);
 
 const logger = createServiceLogger("track-event");

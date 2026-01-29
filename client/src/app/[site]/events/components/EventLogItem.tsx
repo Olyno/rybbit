@@ -3,13 +3,14 @@
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { getTimezone } from "@/lib/store";
-import { ExternalLink, Laptop, Smartphone } from "lucide-react";
+import { Laptop, Smartphone } from "lucide-react";
 import { DateTime } from "luxon";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { memo } from "react";
 import { Event } from "../../../../api/analytics/endpoints";
-import { EventIcon, PageviewIcon } from "../../../../components/EventIcons";
+import { EventTypeIcon } from "../../../../components/EventIcons";
+import { getEventDisplayName, PROPS_TO_HIDE } from "../../../../lib/events";
 import { getCountryName, truncateString } from "../../../../lib/utils";
 import { Browser } from "../../components/shared/icons/Browser";
 import { CountryFlag } from "../../components/shared/icons/CountryFlag";
@@ -41,6 +42,10 @@ export function EventLogItem({ event }: EventLogItemProps) {
   // Determine event type
   const isPageview = event.type === "pageview";
   const isOutbound = event.type === "outbound";
+  const isButtonClick = event.type === "button_click";
+  const isCopy = event.type === "copy";
+  const isFormSubmit = event.type === "form_submit";
+  const isInputChange = event.type === "input_change";
 
   const fullPath = `https://${event.hostname}${event.pathname}${event.querystring ? `${event.querystring}` : ""}`;
 
@@ -63,13 +68,7 @@ export function EventLogItem({ event }: EventLogItemProps) {
           <div className="flex items-center gap-2 grow min-w-0">
             {/* Event type icon */}
             <div className="shrink-0">
-              {isPageview ? (
-                <PageviewIcon />
-              ) : isOutbound ? (
-                <ExternalLink className="w-4 h-4 text-purple-500" />
-              ) : (
-                <EventIcon />
-              )}
+              <EventTypeIcon type={event.type} />
             </div>
 
             {/* Event name or path */}
@@ -84,13 +83,17 @@ export function EventLogItem({ event }: EventLogItemProps) {
                 // For outbound events, show the destination URL from properties
                 eventProperties.url ? (
                   <Link href={eventProperties.url} target="_blank" rel="noopener noreferrer">
-                    <div className="text-sm truncate hover:underline text-purple-400" title={eventProperties.url}>
+                    <div className="text-sm truncate hover:underline" title={eventProperties.url}>
                       {truncateString(eventProperties.url, 64)}
                     </div>
                   </Link>
                 ) : (
-                  <div className="text-sm font-medium truncate text-purple-400">Outbound Link</div>
+                  <div className="text-sm font-medium truncate">Outbound Link</div>
                 )
+              ) : isButtonClick || isCopy || isFormSubmit || isInputChange ? (
+                <div className="text-sm font-medium truncate">
+                  {getEventDisplayName({ type: event.type, event_name: event.event_name, props: eventProperties })}
+                </div>
               ) : (
                 <div className="text-sm font-medium truncate">{event.event_name}</div>
               )}
@@ -164,31 +167,39 @@ export function EventLogItem({ event }: EventLogItemProps) {
         </div>
 
         {/* Bottom row with event properties */}
-        {Object.keys(eventProperties).length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-1 ml-6">
-            {Object.entries(eventProperties).map(([key, value]) => (
-              <Badge
-                key={key}
-                variant="outline"
-                className="px-1.5 py-0 h-5 text-xs bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 font-medium truncate max-w-[90%]"
-              >
-                <span className="text-neutral-600 dark:text-neutral-300 font-light mr-1">{key}:</span>{" "}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="truncate">
-                      {typeof value === "object" ? JSON.stringify(value) : String(value)}
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <span className="max-w-7xl">
-                      {typeof value === "object" ? JSON.stringify(value) : String(value)}
-                    </span>
-                  </TooltipContent>
-                </Tooltip>
-              </Badge>
-            ))}
-          </div>
-        )}
+        {Object.keys(eventProperties).length > 0 && (() => {
+          const propsToHide = PROPS_TO_HIDE[event.type] || [];
+          const filteredProps = Object.entries(eventProperties).filter(
+            ([key]) => !propsToHide.includes(key)
+          );
+          if (filteredProps.length === 0) return null;
+
+          return (
+            <div className="flex flex-wrap gap-1 mt-1 ml-6">
+              {filteredProps.map(([key, value]) => (
+                <Badge
+                  key={key}
+                  variant="outline"
+                  className="px-1.5 py-0 h-5 text-xs bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 font-medium truncate max-w-[90%]"
+                >
+                  <span className="text-neutral-600 dark:text-neutral-300 font-light mr-1">{key}:</span>{" "}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="truncate">
+                        {typeof value === "object" ? JSON.stringify(value) : String(value)}
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <span className="max-w-7xl">
+                        {typeof value === "object" ? JSON.stringify(value) : String(value)}
+                      </span>
+                    </TooltipContent>
+                  </Tooltip>
+                </Badge>
+              ))}
+            </div>
+          );
+        })()}
       </div>
     </div>
   );

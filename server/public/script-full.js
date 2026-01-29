@@ -120,6 +120,9 @@
       enableWebVitals: false,
       trackErrors: false,
       enableSessionReplay: false,
+      trackButtonClicks: false,
+      trackCopy: false,
+      trackFormInteractions: false,
       // rrweb session replay options (undefined means use rrweb defaults)
       sessionReplayBlockClass,
       sessionReplayBlockSelector,
@@ -151,7 +154,10 @@
           trackOutbound: apiConfig.trackOutbound ?? defaultConfig.trackOutbound,
           enableWebVitals: apiConfig.webVitals ?? defaultConfig.enableWebVitals,
           trackErrors: apiConfig.trackErrors ?? defaultConfig.trackErrors,
-          enableSessionReplay: apiConfig.sessionReplay ?? defaultConfig.enableSessionReplay
+          enableSessionReplay: apiConfig.sessionReplay ?? defaultConfig.enableSessionReplay,
+          trackButtonClicks: apiConfig.trackButtonClicks ?? defaultConfig.trackButtonClicks,
+          trackCopy: apiConfig.trackCopy ?? defaultConfig.trackCopy,
+          trackFormInteractions: apiConfig.trackFormInteractions ?? defaultConfig.trackFormInteractions
         };
       } else {
         console.warn("Failed to fetch tracking config from API, using defaults");
@@ -465,11 +471,12 @@
       if (!basePayload) {
         return;
       }
+      const typesWithProperties = ["custom_event", "outbound", "error", "button_click", "copy", "form_submit", "input_change"];
       const payload = {
         ...basePayload,
         type: eventType,
         event_name: eventName,
-        properties: eventType === "custom_event" || eventType === "outbound" || eventType === "error" ? JSON.stringify(properties) : void 0
+        properties: typesWithProperties.includes(eventType) ? JSON.stringify(properties) : void 0
       };
       this.sendTrackingData(payload);
     }
@@ -539,6 +546,18 @@
         }
       }
       this.track("error", error.name || "Error", errorProperties);
+    }
+    trackButtonClick(properties) {
+      this.track("button_click", "", properties);
+    }
+    trackCopy(properties) {
+      this.track("copy", "", properties);
+    }
+    trackFormSubmit(properties) {
+      this.track("form_submit", "", properties);
+    }
+    trackInputChange(properties) {
+      this.track("input_change", "", properties);
     }
     identify(userId, traits) {
       if (typeof userId !== "string" || userId.trim() === "") {
@@ -925,6 +944,171 @@
     }
   };
 
+  // clickTracking.ts
+  var ClickTrackingManager = class {
+    constructor(tracker, config) {
+      this.tracker = tracker;
+      this.config = config;
+    }
+    initialize() {
+      document.addEventListener("click", this.handleClick.bind(this), true);
+    }
+    handleClick(event) {
+      const target = event.target;
+      if (this.config.trackButtonClicks && this.isButton(target)) {
+        this.trackButtonClick(target);
+      }
+    }
+    isButton(element) {
+      if (element.tagName === "BUTTON") return true;
+      if (element.getAttribute("role") === "button") return true;
+      if (element.tagName === "INPUT") {
+        const type = element.type?.toLowerCase();
+        if (type === "submit" || type === "button") return true;
+      }
+      let parent = element.parentElement;
+      let depth = 0;
+      while (parent && depth < 3) {
+        if (parent.tagName === "BUTTON") return true;
+        if (parent.getAttribute("role") === "button") return true;
+        parent = parent.parentElement;
+        depth++;
+      }
+      return false;
+    }
+    trackButtonClick(element) {
+      const buttonElement = this.findButton(element);
+      if (!buttonElement) return;
+      if (buttonElement.hasAttribute("data-rybbit-event")) return;
+      const properties = {
+        text: this.getElementText(buttonElement),
+        ...this.extractDataAttributes(buttonElement)
+      };
+      this.tracker.trackButtonClick(properties);
+    }
+    extractDataAttributes(element) {
+      const attrs = {};
+      for (const attr of element.attributes) {
+        if (attr.name.startsWith("data-rybbit-prop-")) {
+          const key = attr.name.replace("data-rybbit-prop-", "");
+          attrs[key] = attr.value;
+        }
+      }
+      return attrs;
+    }
+    findButton(element) {
+      if (element.tagName === "BUTTON") return element;
+      if (element.getAttribute("role") === "button") return element;
+      if (element.tagName === "INPUT") {
+        const type = element.type?.toLowerCase();
+        if (type === "submit" || type === "button") return element;
+      }
+      let parent = element.parentElement;
+      let depth = 0;
+      while (parent && depth < 3) {
+        if (parent.tagName === "BUTTON") return parent;
+        if (parent.getAttribute("role") === "button") return parent;
+        parent = parent.parentElement;
+        depth++;
+      }
+      return null;
+    }
+    getElementText(element) {
+      const text = element.textContent?.trim().substring(0, 100);
+      return text || void 0;
+    }
+    cleanup() {
+      document.removeEventListener("click", this.handleClick.bind(this), true);
+    }
+  };
+
+  // copyTracking.ts
+  var CopyTrackingManager = class {
+    constructor(tracker) {
+      this.tracker = tracker;
+    }
+    initialize() {
+      document.addEventListener("copy", this.handleCopy.bind(this));
+    }
+    handleCopy() {
+      const selection = window.getSelection();
+      if (!selection || selection.isCollapsed) return;
+      const text = selection.toString();
+      const textLength = text.length;
+      if (textLength === 0) return;
+      const anchorNode = selection.anchorNode;
+      const sourceElement = anchorNode instanceof HTMLElement ? anchorNode : anchorNode?.parentElement;
+      if (!sourceElement) return;
+      const properties = {
+        text: text.substring(0, 500),
+        ...textLength > 500 && { textLength },
+        sourceElement: sourceElement.tagName.toLowerCase()
+      };
+      this.tracker.trackCopy(properties);
+    }
+    cleanup() {
+      document.removeEventListener("copy", this.handleCopy.bind(this));
+    }
+  };
+
+  // formTracking.ts
+  var FormTrackingManager = class {
+    constructor(tracker, config) {
+      this.tracker = tracker;
+      this.config = config;
+      this.boundHandleSubmit = this.handleSubmit.bind(this);
+      this.boundHandleChange = this.handleChange.bind(this);
+    }
+    initialize() {
+      document.addEventListener("submit", this.boundHandleSubmit, true);
+      document.addEventListener("change", this.boundHandleChange, true);
+    }
+    cleanup() {
+      document.removeEventListener("submit", this.boundHandleSubmit, true);
+      document.removeEventListener("change", this.boundHandleChange, true);
+    }
+    handleSubmit(event) {
+      const form = event.target;
+      if (form.tagName !== "FORM") return;
+      const properties = {
+        formId: form.id || "",
+        formName: form.name || "",
+        formAction: form.action || "",
+        method: (form.method || "get").toUpperCase(),
+        fieldCount: form.elements.length,
+        ...this.extractDataAttributes(form)
+      };
+      this.tracker.trackFormSubmit(properties);
+    }
+    handleChange(event) {
+      const target = event.target;
+      const tagName = target.tagName.toUpperCase();
+      if (!["INPUT", "SELECT", "TEXTAREA"].includes(tagName)) return;
+      if (tagName === "INPUT") {
+        const inputType = target.type?.toLowerCase();
+        if (inputType === "hidden" || inputType === "password") return;
+      }
+      const properties = {
+        element: tagName.toLowerCase(),
+        inputType: tagName === "INPUT" ? target.type?.toLowerCase() : void 0,
+        inputName: target.name || target.id || "",
+        formId: target.form?.id || void 0,
+        ...this.extractDataAttributes(target)
+      };
+      this.tracker.trackInputChange(properties);
+    }
+    extractDataAttributes(element) {
+      const attrs = {};
+      for (const attr of element.attributes) {
+        if (attr.name.startsWith("data-rybbit-prop-")) {
+          const key = attr.name.replace("data-rybbit-prop-", "");
+          attrs[key] = attr.value;
+        }
+      }
+      return attrs;
+    }
+  };
+
   // index.ts
   (async function() {
     const scriptTag = document.currentScript;
@@ -969,6 +1153,21 @@
         tracker.trackWebVitals(vitals);
       });
       webVitalsCollector.initialize();
+    }
+    let clickManager = null;
+    let copyManager = null;
+    let formManager = null;
+    if (config.trackButtonClicks) {
+      clickManager = new ClickTrackingManager(tracker, config);
+      clickManager.initialize();
+    }
+    if (config.trackCopy) {
+      copyManager = new CopyTrackingManager(tracker);
+      copyManager.initialize();
+    }
+    if (config.trackFormInteractions) {
+      formManager = new FormTrackingManager(tracker, config);
+      formManager.initialize();
     }
     if (config.trackErrors) {
       window.addEventListener("error", (event) => {
@@ -1052,6 +1251,8 @@
     };
     setupEventListeners();
     window.addEventListener("beforeunload", () => {
+      clickManager?.cleanup();
+      copyManager?.cleanup();
       tracker.cleanup();
     });
     if (config.autoTrackPageview) {
