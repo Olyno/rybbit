@@ -22,7 +22,7 @@ export async function addSite(
   const { domain, name, public: isPublic, saltUserIds, blockBots } = request.body;
 
   // Validate domain format using regex
-  const domainRegex = /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
+  const domainRegex = /^(?:[\p{L}\p{N}](?:[\p{L}\p{N}-]{0,61}[\p{L}\p{N}])?\.)+\p{L}{2,}$/u;
   if (!domainRegex.test(domain)) {
     return reply.status(400).send({
       error: "Invalid domain format. Must be a valid domain like example.com or sub.example.com",
