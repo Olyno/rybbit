@@ -10,6 +10,7 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { AuthenticationGuard } from "../components/AuthenticationGuard";
 import { OrganizationInitializer } from "../components/OrganizationInitializer";
 import { Toaster } from "../components/ui/sonner";
+import { VersionCheck } from "../components/VersionCheck";
 import { TooltipProvider } from "../components/ui/tooltip";
 import { cn } from "../lib/utils";
 import "./globals.css";
@@ -35,6 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <AuthenticationGuard />
                 {children}
               </QueryProvider>
+              <VersionCheck />
               <Toaster />
             </TooltipProvider>
           </ThemeProvider>
