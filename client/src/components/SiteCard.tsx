@@ -41,6 +41,7 @@ export function SiteCard({ siteId, domain, tags = [], allTags = [], onTagsUpdate
   const { data, isLoading, isSuccess } = useGetOverviewBucketed({
     site: siteId,
     bucket,
+    useFilters: false,
     props: {
       enabled: isInView,
     },
@@ -52,12 +53,14 @@ export function SiteCard({ siteId, domain, tags = [], allTags = [], onTagsUpdate
     isSuccess: isOverviewSuccess,
   } = useGetOverview({
     site: siteId,
+    useFilters: false,
   });
 
   // Previous period - automatically handles both regular time-based and past-minutes queries
   const { data: overviewDataPrevious } = useGetOverview({
     site: siteId,
     periodTime: "previous",
+    useFilters: false,
   });
 
   // Update the hasLoadedData ref when data loads successfully
