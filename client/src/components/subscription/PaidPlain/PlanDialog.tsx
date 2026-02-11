@@ -66,6 +66,7 @@ export function PlanDialog({ open, onOpenChange, currentPlanName, hasActiveSubsc
             successUrl,
             cancelUrl,
             organizationId: activeOrg.id,
+            referral: window.Rewardful?.referral || undefined,
           }),
         });
 

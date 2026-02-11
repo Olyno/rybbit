@@ -10,13 +10,14 @@ interface CheckoutRequestBody {
   successUrl: string;
   cancelUrl: string;
   organizationId: string;
+  referral?: string;
 }
 
 export async function createCheckoutSession(
   request: FastifyRequest<{ Body: CheckoutRequestBody }>,
   reply: FastifyReply
 ) {
-  const { priceId, successUrl, cancelUrl, organizationId } = request.body;
+  const { priceId, successUrl, cancelUrl, organizationId, referral } = request.body;
   const userId = request.user?.id;
 
   if (!userId) {
@@ -83,6 +84,7 @@ export async function createCheckoutSession(
         metadata: {
           organizationId: org.id,
           createdByUserId: userId, // For audit trail
+          ...(referral && { referral }),
         },
       });
       stripeCustomerId = customer.id;
@@ -104,6 +106,7 @@ export async function createCheckoutSession(
       ],
       success_url: successUrl,
       cancel_url: cancelUrl,
+      ...(referral && { client_reference_id: referral }),
       // Store organization ID in metadata for webhook processing
       metadata: {
         organizationId: organizationId,

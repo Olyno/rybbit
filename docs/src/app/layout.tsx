@@ -81,6 +81,26 @@ export default function Layout({ children }: { children: ReactNode }) {
         data-site-id="3b023d1a7895"
         data-namespace="rybbit_demo"
       />
+      <Script id="rewardful-queue" strategy="beforeInteractive">
+        {`(function(w,r){w._rwq=r;w[r]=w[r]||function(){(w[r].q=w[r].q||[]).push(arguments)}})(window,'rewardful');`}
+      </Script>
+      <Script src="https://r.wdfl.co/rw.js" data-rewardful="fc3780" strategy="afterInteractive" />
+      <Script id="rewardful-cross-domain" strategy="afterInteractive">
+        {`document.addEventListener('click', function(e) {
+          var link = e.target && e.target.closest ? e.target.closest('a') : null;
+          if (!link || !link.href) return;
+          if (link.href.indexOf('app.rybbit.io') === -1) return;
+          var referral = window.Rewardful && window.Rewardful.referral;
+          if (!referral) return;
+          try {
+            var url = new URL(link.href);
+            if (!url.searchParams.has('referral')) {
+              url.searchParams.set('referral', referral);
+              link.href = url.toString();
+            }
+          } catch(e) {}
+        });`}
+      </Script>
       <body className={`flex flex-col min-h-screen ${inter.variable} font-sans`}>
         <RootProvider
           theme={{

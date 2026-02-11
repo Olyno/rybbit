@@ -12,6 +12,7 @@ import { FreePlan } from "../../../../components/subscription/FreePlan";
 import { OverridePlan } from "../../../../components/subscription/OverridePlan";
 import { Building } from "lucide-react";
 import { authClient } from "@/lib/auth";
+import { useEffect } from "react";
 import { AppSumoPlan } from "../../../../components/subscription/AppSumoPlan";
 
 export default function OrganizationSubscriptionPage() {
@@ -20,6 +21,13 @@ export default function OrganizationSubscriptionPage() {
 
   const { data: activeOrg, isPending } = authClient.useActiveOrganization();
   const { data: session } = authClient.useSession();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("session_id") && session?.user?.email) {
+      window.rewardful?.("convert", { email: session.user.email });
+    }
+  }, [session?.user?.email]);
 
   // Check if the current user is an owner by looking at the members in the active organization
   const currentUserMember = activeOrg?.members?.find(member => member.userId === session?.user?.id);

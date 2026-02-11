@@ -78,6 +78,7 @@ export function PricingCards({ isLoggedIn }: { isLoggedIn: boolean }) {
           successUrl: successUrl,
           cancelUrl: cancelUrl,
           organizationId: activeOrg.id,
+          referral: window.Rewardful?.referral || undefined,
         }),
       });
 
