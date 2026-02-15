@@ -14,7 +14,6 @@ export async function deleteSite(request: FastifyRequest<{ Params: { siteId: str
   // });
 
   await Promise.all([
-    db.delete(sites).where(eq(sites.siteId, Number(id))),
     clickhouse.command({
       query: "DELETE FROM session_replay_events WHERE site_id = {id:UInt32}",
       query_params: { id: Number(id) },
@@ -23,9 +22,9 @@ export async function deleteSite(request: FastifyRequest<{ Params: { siteId: str
       query: "DELETE FROM session_replay_metadata WHERE site_id = {id:UInt32}",
       query_params: { id: Number(id) },
     }),
+    siteConfig.removeSite(Number(id))
   ]);
 
-  siteConfig.removeSite(Number(id));
 
   return reply.status(200).send({ success: true });
 }
