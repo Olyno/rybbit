@@ -101,7 +101,7 @@ export function EventLog() {
         >
           <div className="relative h-full pr-2 font-mono text-[11px] leading-4">
             <div className="sticky top-0 z-20 bg-neutral-50/95 dark:bg-neutral-850/95 backdrop-blur border-b border-neutral-100 dark:border-neutral-800">
-              <div className="grid grid-cols-[28px_140px_180px_100px_1fr_1fr] px-2 py-1.5 uppercase tracking-wide text-[10px] text-neutral-500 dark:text-neutral-400">
+              <div className="grid grid-cols-[28px_145px_180px_100px_1fr_1fr] px-2 py-1.5 uppercase tracking-wide text-[10px] text-neutral-500 dark:text-neutral-400">
                 <div></div>
                 <div>Timestamp</div>
                 <div>User</div>
@@ -199,7 +199,7 @@ export function EventLog() {
 
 function EventLogItemSkeleton({ showProperties }: { showProperties?: boolean }) {
   return (
-    <div className="grid grid-cols-[28px_140px_180px_100px_1fr_1fr] border-b border-neutral-100 dark:border-neutral-800 px-2 py-1">
+    <div className="grid grid-cols-[28px_145px_180px_100px_1fr_1fr] border-b border-neutral-100 dark:border-neutral-800 px-2 py-1">
       <div className="flex items-center justify-center">
         <div className="h-4 w-4 rounded bg-neutral-200 dark:bg-neutral-700 animate-pulse" />
       </div>
