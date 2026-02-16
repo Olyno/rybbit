@@ -16,7 +16,7 @@ import { useEffect } from "react";
 import { AppSumoPlan } from "../../../../components/subscription/AppSumoPlan";
 
 export default function OrganizationSubscriptionPage() {
-  useSetPageTitle("Rybbit · Organization Subscription");
+  useSetPageTitle("Organization Subscription");
   const { data: activeSubscription, isLoading: isLoadingSubscription } = useStripeSubscription();
 
   const { data: activeOrg, isPending } = authClient.useActiveOrganization();

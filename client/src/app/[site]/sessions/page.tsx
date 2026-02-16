@@ -17,7 +17,7 @@ import { SubHeader } from "../components/SubHeader/SubHeader";
 const LIMIT = 100;
 
 export default function SessionsPage() {
-  useSetPageTitle("Rybbit · Sessions");
+  useSetPageTitle("Sessions");
   const [page, setPage] = useState(1);
   const [identifiedOnly, setIdentifiedOnly] = useState(false);
   const [minPageviews, setMinPageviews] = useState<number | undefined>(undefined);

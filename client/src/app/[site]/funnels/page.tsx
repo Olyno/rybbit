@@ -58,7 +58,7 @@ const FunnelRowSkeleton = () => (
 );
 
 export default function FunnelsPage() {
-  useSetPageTitle("Rybbit · Funnels");
+  useSetPageTitle("Funnels");
 
   const { site } = useStore();
   const { data: funnels, isLoading, error } = useGetFunnels(site);

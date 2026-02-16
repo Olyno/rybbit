@@ -4,7 +4,7 @@ import { useSetPageTitle } from "../../../hooks/useSetPageTitle";
 import { AccountInner } from "./components/AccountInner";
 
 export default function AccountPage() {
-  useSetPageTitle("Rybbit · Account");
+  useSetPageTitle("Account");
 
   return (
     <>

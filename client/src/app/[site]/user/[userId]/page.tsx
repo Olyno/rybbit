@@ -27,7 +27,7 @@ import { UserTopPages } from "./components/UserTopPages";
 const LIMIT = 25;
 
 export default function UserPage() {
-  useSetPageTitle("Rybbit · User");
+  useSetPageTitle("User");
 
   const { userId: rawUserId, site } = useParams();
   const userId = (() => {

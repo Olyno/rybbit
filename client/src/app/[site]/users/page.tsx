@@ -9,7 +9,7 @@ import { TraitsExplorer } from "./components/TraitsExplorer";
 import { UsersTable } from "./components/UsersTable";
 
 export default function UsersPage() {
-  useSetPageTitle("Rybbit · Users");
+  useSetPageTitle("Users");
 
   return (
     <DisabledOverlay message="Users" featurePath="users">

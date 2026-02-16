@@ -9,7 +9,7 @@ import { DisabledOverlay } from "../../../components/DisabledOverlay";
 import { useSetPageTitle } from "../../../hooks/useSetPageTitle";
 
 export default function PerformancePage() {
-  useSetPageTitle("Rybbit · Performance");
+  useSetPageTitle("Performance");
   return (
     <DisabledOverlay message="Performance" featurePath="performance">
       <div className="p-2 md:p-4 max-w-[1100px] mx-auto space-y-3 ">

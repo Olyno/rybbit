@@ -23,7 +23,7 @@ export default function Pages() {
   });
   const [totalPages, setTotalPages] = useState(0);
 
-  useSetPageTitle("Rybbit · Pages");
+  useSetPageTitle("Pages");
 
   // Get page number (1-based) from pageIndex (0-based)
   const pageNumber = pagination.pageIndex + 1;

@@ -57,7 +57,7 @@ const GoalCardSkeleton = () => (
 );
 
 export default function GoalsPage() {
-  useSetPageTitle("Rybbit · Goals");
+  useSetPageTitle("Goals");
 
   const { site } = useStore();
   const [searchQuery, setSearchQuery] = useState("");
@@ -131,9 +131,9 @@ export default function GoalsPage() {
   // Transform data for TablePagination
   const paginationData = goalsData
     ? {
-        items: goalsData.data,
-        total: goalsData.meta.total,
-      }
+      items: goalsData.data,
+      total: goalsData.meta.total,
+    }
     : undefined;
 
   return (

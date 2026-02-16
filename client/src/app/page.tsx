@@ -20,7 +20,7 @@ import { canGoForward, goBack, goForward, useStore } from "../lib/store";
 import { AddSite } from "./components/AddSite";
 
 export default function Home() {
-  useSetPageTitle("Rybbit · Home");
+  useSetPageTitle("Home");
 
   const { time, setTime } = useStore();
   const { data: activeOrganization, isPending } = authClient.useActiveOrganization();
