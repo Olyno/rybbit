@@ -214,6 +214,11 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/brand" className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors">
+                  Brand Kit
+                </Link>
+              </li>
+              <li>
                 <a href="mailto:hello@rybbit.com" className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors">
                   Support
                 </a>
