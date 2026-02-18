@@ -2,7 +2,7 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/public/rybbit/horizontal_white.svg">
     <source media="(prefers-color-scheme: light)" srcset="docs/public/rybbit/horizontal_black.svg">
-    <img src="docs/public/rybbit/horizontal_black.svg" height="100" alt="Rybbit">
+    <img src="docs/public/rybbit/horizontal_black.svg" height="70" alt="Rybbit">
   </picture>
     <p align="center">Open Source Web & Product Analytics</p>
 
