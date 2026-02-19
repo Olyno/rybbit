@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Minus } from "lucide-react";
+import { CircleCheckBig, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AppLink } from "@/components/AppLink";
 import { BASIC_SITE_LIMIT, BASIC_TEAM_LIMIT, DEFAULT_EVENT_LIMIT, FREE_SITE_LIMIT, STANDARD_SITE_LIMIT, STANDARD_TEAM_LIMIT } from "../../../../lib/const";
@@ -283,7 +283,7 @@ interface FeatureCellProps {
 function FeatureCell({ value }: FeatureCellProps) {
   if (typeof value === "boolean") {
     return value ? (
-      <Check className="h-5 w-5 text-emerald-600 dark:text-emerald-400 mx-auto" />
+      <CircleCheckBig className="h-5 w-5 text-emerald-600 dark:text-emerald-400 mx-auto" />
     ) : (
       <Minus className="h-5 w-5 text-neutral-500 mx-auto" />
     );
@@ -306,7 +306,7 @@ export function ComparisonSection({ isAnnual }: { isAnnual: boolean }) {
               <div className="flex flex-col items-center justify-center px-4 border-r border-neutral-400/50 dark:border-neutral-700/50">
                 <div className="font-semibold text-lg text-center mb-3">
                   Basic{" "}
-                  <span className="text-sm text-neutral-500 dark:text-neutral-400 font-normal block">From ${isAnnual ? "12" : "14"} /month</span>
+                  <span className="text-sm text-neutral-500 dark:text-neutral-400 font-normal block">From ${isAnnual ? "9" : "14"} /month</span>
                 </div>
                 <AppLink
                   href="https://app.rybbit.io/signup"
@@ -318,7 +318,7 @@ export function ComparisonSection({ isAnnual }: { isAnnual: boolean }) {
               <div className="flex flex-col items-center justify-center px-4 border-r border-neutral-400/50 dark:border-neutral-700/50">
                 <div className="font-semibold text-lg text-center mb-3">
                   Standard{" "}
-                  <span className="text-sm text-neutral-500 dark:text-neutral-400 font-normal block">From ${isAnnual ? "16" : "19"} /month</span>
+                  <span className="text-sm text-neutral-500 dark:text-neutral-400 font-normal block">From ${isAnnual ? "13" : "19"} /month</span>
                 </div>
                 <AppLink
                   href="https://app.rybbit.io/signup"
@@ -330,7 +330,7 @@ export function ComparisonSection({ isAnnual }: { isAnnual: boolean }) {
               <div className="flex flex-col items-center justify-center px-4 border-r border-neutral-400/50 dark:border-neutral-700/50">
                 <div className="font-semibold text-lg text-emerald-600 dark:text-emerald-400 text-center mb-3">
                   Pro{" "}
-                  <span className="text-sm text-neutral-500 dark:text-neutral-400 font-normal block">From ${isAnnual ? "33" : "39"} /month</span>
+                  <span className="text-sm text-neutral-500 dark:text-neutral-400 font-normal block">From ${isAnnual ? "26" : "39"} /month</span>
                 </div>
                 <AppLink
                   href="https://app.rybbit.io/signup"
