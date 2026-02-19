@@ -23,7 +23,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert } from "@/components/ui/alert";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { authClient } from "@/lib/auth";
-import { IS_CLOUD, STANDARD_TEAM_LIMIT } from "@/lib/const";
+import { BASIC_TEAM_LIMIT, IS_CLOUD, STANDARD_TEAM_LIMIT } from "@/lib/const";
 import { SubscriptionData, useStripeSubscription } from "@/lib/subscription/useStripeSubscription";
 
 import { SiteAccessMultiSelect } from "./SiteAccessMultiSelect";
@@ -38,6 +38,7 @@ const getMemberLimit = (subscription: SubscriptionData | undefined) => {
   if (subscription?.status !== "active") return 1;
   if (subscription?.planName.includes("pro")) return Infinity;
   if (subscription?.planName.includes("standard")) return STANDARD_TEAM_LIMIT;
+  if (subscription?.planName.includes("basic")) return BASIC_TEAM_LIMIT;
   if (subscription?.planName === "appsumo-1") return 1;
   if (subscription?.planName === "appsumo-2") return 3;
   if (subscription?.planName === "appsumo-3") return 10;
