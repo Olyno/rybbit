@@ -1,0 +1,83 @@
+name: Translate Missing Strings
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "client/src/**/*.ts"
+      - "client/src/**/*.tsx"
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: cd client && npm ci
+
+      - name: Extract messages
+        run: cd client && node scripts/extract-messages.mjs
+
+      - name: Check for changes
+        id: changes
+        run: |
+          cd client/messages
+          if git diff --quiet .; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run Claude Code
+        if: steps.changes.outputs.has_changes == 'true'
+        id: claude
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            The message extraction step has just run and updated the translation files in client/messages/.
+            New keys have been added with empty string values to the non-English locale files.
+
+            Check the translation files in client/messages/. The source of truth is en.json.
+
+            For each non-English translation file (zh.json, ja.json, de.json, pl.json, pt.json, it.json, fr.json, ko.json, es.json):
+            1. Find any keys that have empty string values (these are newly extracted, untranslated strings)
+            2. Find any keys in the translation file that still have English text (were not actually translated)
+            3. Translate the missing/untranslated strings into the appropriate language using en.json as reference
+            4. Maintain the same key order as en.json
+            5. Also remove any keys that exist in the translation file but NOT in en.json (stale keys)
+
+            Language mapping:
+            - zh.json = Chinese (Simplified)
+            - ja.json = Japanese
+            - de.json = German
+            - pl.json = Polish
+            - pt.json = Portuguese (Brazilian)
+            - it.json = Italian
+            - fr.json = French
+            - ko.json = Korean
+            - es.json = Spanish
+
+            Important:
+            - Preserve {placeholder} variables exactly as they appear in the English strings
+            - Keep translations natural and idiomatic, not literal
+            - Maintain consistent terminology within each language file
+            - Do NOT modify en.json
+            - If there are no missing translations, do nothing
+
+            After making changes, create a PR with the title "Update translations" and a summary of what was added/fixed.
+          claude_args: "--model claude-sonnet-4-6 --max-turns 30"
