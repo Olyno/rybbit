@@ -4,6 +4,7 @@ import { clickhouse } from "../../db/clickhouse/clickhouse.js";
 import { db } from "../../db/postgres/postgres.js";
 import { sites, member, organization, memberSiteAccess } from "../../db/postgres/schema.js";
 import { IS_CLOUD, DEFAULT_EVENT_LIMIT } from "../../lib/const.js";
+import { getUserIdFromRequest } from "../../lib/auth-utils.js";
 import { processResults } from "../analytics/utils/utils.js";
 import { getSubscriptionInner } from "../stripe/getSubscription.js";
 
@@ -18,7 +19,8 @@ export async function getSitesFromOrg(
   try {
     const { organizationId } = req.params;
 
-    const userId = req.user?.id;
+    // Use session user ID, falling back to API key user ID
+    const userId = req.user?.id ?? (await getUserIdFromRequest(req));
 
     // Run all database queries concurrently
     const [memberCheck, allSitesData, orgInfo] = await Promise.all([

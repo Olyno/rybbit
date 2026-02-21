@@ -1,9 +1,9 @@
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { DateTime } from "luxon";
 import Stripe from "stripe";
 import { db } from "../../db/postgres/postgres.js";
-import { organization } from "../../db/postgres/schema.js";
+import { organization, member } from "../../db/postgres/schema.js";
 import { getBestSubscription } from "../../lib/subscriptionUtils.js";
 
 function getStartOfMonth() {
@@ -111,6 +111,17 @@ export async function getSubscription(
 
   if (!organizationId) {
     return reply.status(400).send({ error: "Organization ID is required" });
+  }
+
+  // Verify user is a member of this organization
+  const memberResult = await db
+    .select({ role: member.role })
+    .from(member)
+    .where(and(eq(member.userId, userId), eq(member.organizationId, organizationId)))
+    .limit(1);
+
+  if (!memberResult.length) {
+    return reply.status(403).send({ error: "You do not have access to this organization" });
   }
 
   try {
