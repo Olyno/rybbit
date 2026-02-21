@@ -233,7 +233,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-neutral-200 dark:border-neutral-800">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="text-sm text-neutral-400">{t("© {year} Rybbit. All rights reserved.", { year: new Date().getFullYear() })}</div>
+            <div className="text-sm text-neutral-400">{t("© {year} Rybbit. All rights reserved.", { year: String(new Date().getFullYear()) })}</div>
             <LanguageSwitcher />
             <div className="text-sm text-neutral-400">
               {t("Made with ❤️ by frogs")}{" "}
