@@ -87,4 +87,5 @@ jobs:
             - If there are no missing translations, do nothing
 
             After making changes, create a PR with the title "Update translations" and a summary of what was added/fixed.
+          allowed_tools: "Edit,Read,Write,Glob,Grep,Bash(git *),Bash(gh pr *),Bash(python3 *),Bash(node *)"
           claude_args: "--model claude-sonnet-4-6 --max-turns 30"
