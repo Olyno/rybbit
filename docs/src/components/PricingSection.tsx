@@ -243,7 +243,7 @@ export function PricingSection({ isAnnual, setIsAnnual }: { isAnnual: boolean, s
                   </div>
                 )
               }
-              buttonText={!isBasicAvailable ? "Up to 250k only" : "Start free trial"}
+              buttonText={!isBasicAvailable ? "Up to 250k only" : "Start for $0"}
               buttonHref={!isBasicAvailable ? undefined : "https://app.rybbit.io/signup"}
               features={BASIC_FEATURES}
               disabled={!isBasicAvailable}
@@ -267,7 +267,7 @@ export function PricingSection({ isAnnual, setIsAnnual }: { isAnnual: boolean, s
                 </div>
               )
             }
-            buttonText={standardPrices.custom ? "Contact us" : "Start free trial"}
+            buttonText={standardPrices.custom ? "Contact us" : "Start for $0"}
             buttonHref={standardPrices.custom ? "https://www.rybbit.com/contact" : "https://app.rybbit.io/signup"}
             features={STANDARD_FEATURES}
             eventLocation={standardPrices.custom ? undefined : "standard"}
@@ -289,7 +289,7 @@ export function PricingSection({ isAnnual, setIsAnnual }: { isAnnual: boolean, s
                 </div>
               )
             }
-            buttonText={proPrices.custom ? "Contact us" : "Start free trial"}
+            buttonText={proPrices.custom ? "Contact us" : "Start for $0"}
             buttonHref={proPrices.custom ? "https://www.rybbit.com/contact" : "https://app.rybbit.io/signup"}
             features={PRO_FEATURES}
             eventLocation={proPrices.custom ? undefined : "pro"}
