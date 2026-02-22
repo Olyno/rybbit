@@ -67,6 +67,25 @@ export async function getSubscriptionInner(organizationId: string) {
   }
 
   if (subscription.source === "stripe") {
+    if (subscription.status === "trialing") {
+      const trialDaysRemaining = subscription.trialEnd
+        ? Math.max(0, Math.ceil(DateTime.fromJSDate(subscription.trialEnd).diff(DateTime.now(), "days").days))
+        : 0;
+      return {
+        id: subscription.subscriptionId,
+        planName: subscription.planName,
+        status: subscription.status,
+        createdAt: subscription.createdAt,
+        currentPeriodStart: DateTime.fromISO(subscription.periodStart).toJSDate(),
+        currentPeriodEnd: subscription.trialEnd ?? subscription.currentPeriodEnd,
+        cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
+        eventLimit: subscription.eventLimit,
+        monthlyEventCount: org.monthlyEventCount || 0,
+        interval: subscription.interval,
+        isTrial: true,
+        trialDaysRemaining,
+      };
+    }
     return {
       id: subscription.subscriptionId,
       planName: subscription.planName,

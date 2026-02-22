@@ -111,6 +111,8 @@ export async function createCheckoutSession(
       metadata: {
         organizationId: organizationId,
       },
+      // 7-day free trial before charging
+      subscription_data: { trial_period_days: 7 },
       // Allow promotion codes
       allow_promotion_codes: true,
       // Enable automatic tax calculation if configured in Stripe Tax settings

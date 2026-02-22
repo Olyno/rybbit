@@ -5,7 +5,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { PaidPlan } from "../../../../components/subscription/PaidPlain/PaidPlan";
 import { useStripeSubscription } from "../../../../lib/subscription/useStripeSubscription";
 import { NoOrganization } from "../../../../components/NoOrganization";
-import { TrialPlan } from "../../../../components/subscription/TrialPlan";
 import { ExpiredTrialPlan } from "../../../../components/subscription/ExpiredTrialPlan";
 import { useSetPageTitle } from "../../../../hooks/useSetPageTitle";
 import { FreePlan } from "../../../../components/subscription/FreePlan";
@@ -69,10 +68,6 @@ export default function OrganizationSubscriptionPage() {
     // Check if user is on free plan
     if (activeSubscription.status === "free") {
       return <FreePlan />;
-    }
-
-    if (activeSubscription.isTrial) {
-      return <TrialPlan />;
     }
 
     if (activeSubscription.planName.startsWith("appsumo")) {

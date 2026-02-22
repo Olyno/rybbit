@@ -66,7 +66,7 @@ function AppSidebarContent() {
           expanded={isExpanded}
         />
         {
-          IS_CLOUD && subscription?.status === "active" && <SidebarLink
+          IS_CLOUD && (subscription?.status === "active" || subscription?.status === "trialing") && <SidebarLink
             href="mailto:hello@rybbit.com"
             icon={<HelpCircle className="w-5 h-5" />}
             label={t("Email Support")}

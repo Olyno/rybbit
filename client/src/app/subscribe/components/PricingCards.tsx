@@ -257,7 +257,7 @@ export function PricingCards({ isLoggedIn }: { isLoggedIn: boolean }) {
             isAnnual={isAnnual}
             isCustomTier={!isBasicAvailable}
             customPriceLabel="-"
-            buttonText={!isBasicAvailable ? t("Up to 250k only") : isLoading ? t("Processing...") : t("Get started")}
+            buttonText={!isBasicAvailable ? t("Up to 250k only") : isLoading ? t("Processing...") : t("Start free trial")}
             features={BASIC_FEATURES}
             onClick={() => handleSubscribe("basic")}
             disabled={isLoading || !isBasicAvailable}
@@ -270,7 +270,7 @@ export function PricingCards({ isLoggedIn }: { isLoggedIn: boolean }) {
           annualPrice={standardAnnualPrice}
           isAnnual={isAnnual}
           isCustomTier={isCustomTier}
-          buttonText={isLoading ? t("Processing...") : isCustomTier ? t("Contact us") : t("Get started")}
+          buttonText={isLoading ? t("Processing...") : isCustomTier ? t("Contact us") : t("Start free trial")}
           features={STANDARD_FEATURES}
           onClick={() => handleSubscribe("standard")}
           disabled={isLoading}
@@ -282,7 +282,7 @@ export function PricingCards({ isLoggedIn }: { isLoggedIn: boolean }) {
           monthlyPrice={proMonthlyPrice}
           annualPrice={proAnnualPrice}
           isAnnual={isAnnual}
-          buttonText={isLoading ? t("Processing...") : isCustomTier ? t("Contact us") : t("Get started")}
+          buttonText={isLoading ? t("Processing...") : isCustomTier ? t("Contact us") : t("Start free trial")}
           features={PRO_FEATURES}
           recommended={true}
           onClick={() => handleSubscribe("pro")}

@@ -30,6 +30,7 @@ export interface StripeSubscriptionInfo {
   interval: string;
   cancelAtPeriodEnd: boolean;
   createdAt: Date;
+  trialEnd?: Date;
 }
 
 export interface FreeSubscriptionInfo {
@@ -174,11 +175,26 @@ export async function getStripeSubscription(stripeCustomerId: string | null): Pr
       expand: ["data.plan.product"],
     });
 
+    let subscription: Stripe.Subscription;
+    let isTrial = false;
+
     if (subscriptions.data.length === 0) {
-      return null;
+      // Check for trialing subscriptions
+      const trialSubs = await (stripe as Stripe).subscriptions.list({
+        customer: stripeCustomerId,
+        status: "trialing",
+        limit: 1,
+        expand: ["data.plan.product"],
+      });
+      if (trialSubs.data.length === 0) {
+        return null;
+      }
+      subscription = trialSubs.data[0];
+      isTrial = true;
+    } else {
+      subscription = subscriptions.data[0];
     }
 
-    const subscription = subscriptions.data[0];
     const subscriptionItem = subscription.items.data[0];
     const priceId = subscriptionItem.price.id;
 
@@ -205,6 +221,7 @@ export async function getStripeSubscription(stripeCustomerId: string | null): Pr
         interval: subscriptionItem.price.recurring?.interval ?? "unknown",
         cancelAtPeriodEnd: subscription.cancel_at_period_end,
         createdAt: new Date(subscription.created * 1000),
+        ...(isTrial && subscription.trial_end ? { trialEnd: new Date(subscription.trial_end * 1000) } : {}),
       };
     }
 
@@ -228,6 +245,7 @@ export async function getStripeSubscription(stripeCustomerId: string | null): Pr
       interval: subscriptionItem.price.recurring?.interval ?? "unknown",
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
       createdAt: new Date(subscription.created * 1000),
+      ...(isTrial && subscription.trial_end ? { trialEnd: new Date(subscription.trial_end * 1000) } : {}),
     };
   } catch (error) {
     console.error("Error fetching Stripe subscription:", error);

@@ -24,7 +24,7 @@ export function CTASection({
   const t = useExtracted();
   const resolvedTitle = title ?? t("Ready for better analytics?");
   const resolvedDescription = description ?? t("Powerful insights without the complexity. Privacy-focused analytics that just works.");
-  const resolvedPrimaryButtonText = primaryButtonText ?? t("Get started");
+  const resolvedPrimaryButtonText = primaryButtonText ?? t("Start free trial");
   const resolvedSecondaryButtonText = secondaryButtonText ?? t("Live demo");
 
   return (
@@ -83,7 +83,7 @@ export function CTASection({
             </div>
 
             <p className="text-neutral-500 text-sm">
-              {t("30 day money-back guarantee. No credit card required.")}
+              {t("7-day free trial.")}
             </p>
           </div>
         </div>
