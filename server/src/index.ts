@@ -1,4 +1,5 @@
 import cors from "@fastify/cors";
+import rateLimit from "@fastify/rate-limit";
 import fastifyStatic from "@fastify/static";
 import { toNodeHandler } from "better-auth/node";
 import Fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest } from "fastify";
@@ -145,8 +146,7 @@ const __dirname = dirname(__filename);
 const server = Fastify({
   disableRequestLogging: true,
   logger: {
-    // level: process.env.LOG_LEVEL || (process.env.NODE_ENV === "development" ? "debug" : "info"),
-    level: "debug",
+    level: process.env.LOG_LEVEL || (process.env.NODE_ENV === "development" ? "debug" : "info"),
     transport: {
       target: "pino-pretty",
       level: process.env.LOG_LEVEL || "debug",
@@ -179,9 +179,29 @@ const server = Fastify({
   bodyLimit: 10 * 1024 * 1024, // 10MB limit for session replay data
 });
 
+const allowedOrigins = [
+  "http://localhost:3002",
+  "http://localhost:3001",
+  ...(process.env.BASE_URL ? [process.env.BASE_URL] : []),
+  ...(process.env.TRUSTED_ORIGINS?.split(",").filter(Boolean) || []),
+];
+
 server.register(cors, {
-  origin: (_origin, callback) => {
-    callback(null, true);
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    
+    // In development, allow all origins
+    if (process.env.NODE_ENV !== "production") {
+      return callback(null, true);
+    }
+    
+    // In production, check against allowed list
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    return callback(new Error("Not allowed by CORS"), false);
   },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "x-captcha-response", "x-private-key"],

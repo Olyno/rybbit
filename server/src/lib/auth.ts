@@ -2,15 +2,14 @@ import { betterAuth } from "better-auth";
 import { createAuthMiddleware } from "better-auth/api";
 import { admin, captcha, emailOTP, organization, apiKey } from "better-auth/plugins";
 import dotenv from "dotenv";
-import { and, asc, eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import pg from "pg";
 
 import { db } from "../db/postgres/postgres.js";
 import * as schema from "../db/postgres/schema.js";
-import { invitation, member, memberSiteAccess, user } from "../db/postgres/schema.js";
+import { user } from "../db/postgres/schema.js";
 import { DISABLE_SIGNUP, IS_CLOUD } from "./const.js";
-import { addContactToAudience, sendInvitationEmail, sendOtpEmail, sendWelcomeEmail } from "./email/email.js";
-import { onboardingTipsService } from "../services/onboardingTips/onboardingTipsService.js";
+import { sendInvitationEmail, sendOtpEmail, sendWelcomeEmail } from "./email/email.js";
 
 dotenv.config();
 
@@ -18,40 +17,18 @@ const pluginList = [
   admin(),
   apiKey(),
   organization({
+    // Allow users to create organizations
     allowUserToCreateOrganization: true,
+    // Set the creator role to owner
     creatorRole: "owner",
-    sendInvitationEmail: async invitationData => {
-      const inviteLink = `${process.env.BASE_URL}/invitation?invitationId=${invitationData.invitation.id}&organization=${invitationData.organization.name}&inviterEmail=${invitationData.inviter.user.email}`;
+    sendInvitationEmail: async invitation => {
+      const inviteLink = `${process.env.BASE_URL}/invitation?invitationId=${invitation.invitation.id}&organization=${invitation.organization.name}&inviterEmail=${invitation.inviter.user.email}`;
       await sendInvitationEmail(
-        invitationData.email,
-        invitationData.inviter.user.email,
-        invitationData.organization.name,
+        invitation.email,
+        invitation.inviter.user.email,
+        invitation.organization.name,
         inviteLink
       );
-    },
-    schema: {
-      organization: {
-        additionalFields: {
-          stripeCustomerId: {
-            type: "string",
-            required: false,
-          },
-          monthlyEventCount: {
-            type: "number",
-            required: false,
-            defaultValue: 0,
-          },
-          overMonthlyLimit: {
-            type: "boolean",
-            required: false,
-            defaultValue: false,
-          },
-          planOverride: {
-            type: "string",
-            required: false,
-          },
-        },
-      },
     },
   }),
   emailOTP({
@@ -70,8 +47,17 @@ const pluginList = [
     : []),
 ];
 
+// Validate base URL is configured
+const baseURL = process.env.BETTER_AUTH_URL || process.env.BASE_URL;
+if (!baseURL) {
+  throw new Error(
+    "Missing required environment variable: BETTER_AUTH_URL or BASE_URL must be set for authentication"
+  );
+}
+
 export const auth = betterAuth({
   basePath: "/api/auth",
+  baseURL,
   database: new pg.Pool({
     host: process.env.POSTGRES_HOST || "postgres",
     port: parseInt(process.env.POSTGRES_PORT || "5432", 10),
@@ -103,11 +89,6 @@ export const auth = betterAuth({
         defaultValue: true,
         input: true,
       },
-      // scheduledTipEmailIds: {
-      //   type: "string[]",
-      //   required: false,
-      //   defaultValue: [],
-      // },
     },
     deleteUser: {
       enabled: true,
@@ -117,7 +98,11 @@ export const auth = betterAuth({
     },
   },
   plugins: pluginList,
-  trustedOrigins: ["http://localhost:3002"],
+  trustedOrigins: [
+    "http://localhost:3002",
+    baseURL,
+  ],
+  trustHost: process.env.AUTH_TRUST_HOST === "true",
   advanced: {
     useSecureCookies: process.env.NODE_ENV === "production", // don't mark Secure in dev
     defaultCookieAttributes: {
@@ -128,28 +113,12 @@ export const auth = betterAuth({
   databaseHooks: {
     user: {
       create: {
-        after: async u => {
-          console.log(u);
+        after: async () => {
           const users = await db.select().from(schema.user).orderBy(asc(user.createdAt));
 
           // If this is the first user, make them an admin
           if (users.length === 1) {
             await db.update(user).set({ role: "admin" }).where(eq(user.id, users[0].id));
-          }
-
-          sendWelcomeEmail(u.email, u.name);
-          // Add contact to marketing audience and schedule onboarding emails
-          try {
-            await addContactToAudience(u.email, u.name);
-
-            const emailIds = await onboardingTipsService.scheduleOnboardingEmails(u.email, u.name);
-
-            // Store scheduled email IDs for potential cancellation
-            if (emailIds.length > 0) {
-              await db.update(user).set({ scheduledTipEmailIds: emailIds }).where(eq(user.id, u.id));
-            }
-          } catch (error) {
-            console.error("Error setting up onboarding emails:", error);
           }
         },
       },
@@ -176,65 +145,10 @@ export const auth = betterAuth({
   },
   hooks: {
     after: createAuthMiddleware(async ctx => {
-      // Handle invitation acceptance - copy site access from invitation to member
-      if (ctx.path === "/organization/accept-invitation") {
-        try {
-          const body = ctx.body as { invitationId?: string } | null;
-          const invitationId = body?.invitationId;
-
-          if (invitationId) {
-            // Query the invitation to get site access settings and org/email info
-            const invitationRecord = await db
-              .select({
-                organizationId: invitation.organizationId,
-                email: invitation.email,
-                hasRestrictedSiteAccess: invitation.hasRestrictedSiteAccess,
-                siteIds: invitation.siteIds,
-              })
-              .from(invitation)
-              .where(eq(invitation.id, invitationId))
-              .limit(1);
-
-            if (invitationRecord.length > 0) {
-              const { organizationId, email, hasRestrictedSiteAccess, siteIds } = invitationRecord[0];
-
-              if (hasRestrictedSiteAccess) {
-                // Find the user by email
-                const userRecord = await db.select({ id: user.id }).from(user).where(eq(user.email, email)).limit(1);
-
-                if (userRecord.length > 0) {
-                  await db.transaction(async tx => {
-                    // Find the member by organizationId + userId
-                    const memberRecord = await tx
-                      .select({ id: member.id })
-                      .from(member)
-                      .where(and(eq(member.organizationId, organizationId), eq(member.userId, userRecord[0].id)))
-                      .limit(1);
-
-                    if (memberRecord.length > 0) {
-                      const memberId = memberRecord[0].id;
-
-                      // Update member with hasRestrictedSiteAccess
-                      await tx.update(member).set({ hasRestrictedSiteAccess: true }).where(eq(member.id, memberId));
-
-                      // Insert site access entries
-                      const siteIdArray = (siteIds || []) as number[];
-                      if (siteIdArray.length > 0) {
-                        await tx.insert(memberSiteAccess).values(
-                          siteIdArray.map(siteId => ({
-                            memberId: memberId,
-                            siteId: siteId,
-                          }))
-                        );
-                      }
-                    }
-                  });
-                }
-              }
-            }
-          }
-        } catch (error) {
-          console.error("Error copying site access from invitation to member:", error);
+      if (ctx.path.startsWith("/sign-up") && IS_CLOUD) {
+        const newSession = ctx.context.newSession;
+        if (newSession) {
+          sendWelcomeEmail(newSession.user.email, newSession.user.name);
         }
       }
     }),

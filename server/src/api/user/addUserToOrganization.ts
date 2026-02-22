@@ -1,9 +1,15 @@
 import { and, eq } from "drizzle-orm";
 import { FastifyReply, FastifyRequest } from "fastify";
+import { z } from "zod";
 import { db } from "../../db/postgres/postgres.js";
 import { member, user } from "../../db/postgres/schema.js";
 import { randomBytes } from "crypto";
 import { getIsUserAdmin } from "../../lib/auth-utils.js";
+
+const addUserSchema = z.object({
+  email: z.string().email("Invalid email format"),
+  role: z.enum(["admin", "member", "owner"]),
+});
 
 function generateId(len = 32) {
   const alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -28,8 +34,16 @@ interface AddUserToOrganization {
 export async function addUserToOrganization(request: FastifyRequest<AddUserToOrganization>, reply: FastifyReply) {
   try {
     const { organizationId } = request.params;
-    const { email, role } = request.body;
     const userId = request.user?.id;
+
+    // Validate input
+    const validation = addUserSchema.safeParse(request.body);
+    if (!validation.success) {
+      return reply.status(400).send({
+        error: validation.success ? "Invalid input" : validation.error.errors[0].message,
+      });
+    }
+    const { email, role } = validation.data;
 
     const isAdmin = await getIsUserAdmin(request);
 
@@ -45,18 +59,7 @@ export async function addUserToOrganization(request: FastifyRequest<AddUserToOrg
       }
     }
 
-    // Validate input
-    if (!email || !role) {
-      return reply.status(400).send({
-        error: "Missing required fields: email and role",
-      });
-    }
 
-    if (role !== "admin" && role !== "member" && role !== "owner") {
-      return reply.status(400).send({
-        error: "Role must be either admin, member, or owner",
-      });
-    }
 
     const foundUser = await db.query.user.findFirst({
       where: eq(user.email, email),
