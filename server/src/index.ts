@@ -208,6 +208,17 @@ server.register(cors, {
   credentials: true,
 });
 
+// Rate limiting
+server.register(rateLimit, {
+  max: 100,
+  timeWindow: "1 minute",
+  keyGenerator: (req) => {
+    // Use IP address as key, with fallback to 'anonymous'
+    return req.ip || "anonymous";
+  },
+  skipOnError: true, // Continue even if Redis/cache fails
+});
+
 // Serve static files
 server.register(fastifyStatic, {
   root: join(__dirname, "../public"),
