@@ -152,7 +152,7 @@ export function PricingSection({ isAnnual, setIsAnnual }: { isAnnual: boolean, s
             Pricing
           </h2>
           <p className="text-lg text-neutral-600 dark:text-neutral-300">
-            Try Rybbit today risk-free with our 30-day money-back guarantee.
+            Start your 7-day free trial — no credit card charges until the trial ends.
           </p>
         </div>
 
@@ -243,7 +243,7 @@ export function PricingSection({ isAnnual, setIsAnnual }: { isAnnual: boolean, s
                   </div>
                 )
               }
-              buttonText={!isBasicAvailable ? "Up to 250k only" : "Get started"}
+              buttonText={!isBasicAvailable ? "Up to 250k only" : "Start free trial"}
               buttonHref={!isBasicAvailable ? undefined : "https://app.rybbit.io/signup"}
               features={BASIC_FEATURES}
               disabled={!isBasicAvailable}
@@ -267,7 +267,7 @@ export function PricingSection({ isAnnual, setIsAnnual }: { isAnnual: boolean, s
                 </div>
               )
             }
-            buttonText={standardPrices.custom ? "Contact us" : "Get started"}
+            buttonText={standardPrices.custom ? "Contact us" : "Start free trial"}
             buttonHref={standardPrices.custom ? "https://www.rybbit.com/contact" : "https://app.rybbit.io/signup"}
             features={STANDARD_FEATURES}
             eventLocation={standardPrices.custom ? undefined : "standard"}
@@ -289,7 +289,7 @@ export function PricingSection({ isAnnual, setIsAnnual }: { isAnnual: boolean, s
                 </div>
               )
             }
-            buttonText={proPrices.custom ? "Contact us" : "Get started"}
+            buttonText={proPrices.custom ? "Contact us" : "Start free trial"}
             buttonHref={proPrices.custom ? "https://www.rybbit.com/contact" : "https://app.rybbit.io/signup"}
             features={PRO_FEATURES}
             eventLocation={proPrices.custom ? undefined : "pro"}
