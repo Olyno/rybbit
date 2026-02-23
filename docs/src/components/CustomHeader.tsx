@@ -18,7 +18,7 @@ export function CustomHeader() {
   return (
     <header className="sticky top-0 z-50 w-full">
       {/* <BlackFridayBanner /> */}
-      <WelcomeBanner />
+      {/* <WelcomeBanner /> */}
       <nav className="mx-auto flex max-w-[1167px] items-center justify-between px-4 py-3 sm:border border-neutral-200 sm:rounded-xl dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/80 backdrop-blur-md sm:mt-1 shadow-md" aria-label="Global">
         {/* Logo */}
         <div className="flex items-center">
