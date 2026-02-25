@@ -2,12 +2,20 @@
 title: Goals
 description: Track conversions by monitoring page visits and custom events
 ---
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+
+![Goals Dashboard](/docs/goals/1.png)
 
 Goals let you define specific actions — visiting a page or triggering an event — and measure how often your visitors complete them. Each goal tracks a conversion rate against total sessions, giving you a clear picture of how effectively your site drives key outcomes.
 
 ## Creating a Goal
 
-Click **Create Goal** to open the goal form. Every goal has:
+![Creating a Goal](/docs/goals/3.png)
+<Steps>
+<Step>
+### Click "Create Goal"
+Every goal has:
 
 - **Name** (optional) — A friendly label like "Completed Checkout" or "Signed Up"
 - **Type** — Either **Page Goal** or **Event Goal**
@@ -17,8 +25,14 @@ Click **Create Goal** to open the goal form. Every goal has:
 You cannot change a goal's type after creation. If you need a different type, create a new goal.
 </Callout>
 
-### Page Goals
+</Step>
+<Step>
+### Choose a Goal Type
 
+There are two types of goals: **Page Goals** and **Event Goals**.
+
+<Tabs items={['Page Goals', 'Event Goals']}>
+<Tab value="Page Goals">
 Page goals track when a user visits a URL matching a given path pattern.
 
 - The value must be a path starting with `/` (not a full URL)
@@ -28,13 +42,18 @@ Page goals track when a user visits a URL matching a given path pattern.
 
 The form provides autocomplete suggestions based on actual paths seen on your site.
 
-### Event Goals
-
+</Tab>
+<Tab value="Event Goals">
 Event goals track when a custom event with a specific name is fired. The value is the event name (e.g., `signup_clicked`, `purchase_completed`).
 
 Events must be tracked using the Rybbit tracking script. See [Track Events](/docs/track-events) for setup instructions.
+</Tab>
+</Tabs>
+</Step>
+<Step>
+### Add Property Filters (optional)
 
-### Property Filters
+![Property Filters](/docs/goals/4.png)
 
 You can narrow a goal to only count conversions when specific properties match:
 
@@ -43,6 +62,8 @@ You can narrow a goal to only count conversions when specific properties match:
 
 Toggle **Match specific URL parameters** or **Match specific event properties** to add filters. You can add multiple filters per goal — all filters must match for a session to count as a conversion.
 
+</Step>
+</Steps>
 ## Goal Metrics
 
 Each goal card displays:
@@ -53,6 +74,8 @@ Each goal card displays:
 Goals respect the global date range and filters (country, device, browser, etc.) applied on the page.
 
 ## Viewing Converted Sessions
+
+![Viewing Converted Sessions](/docs/goals/2.png)
 
 Click a goal card to expand it and see the sessions that converted. Each session shows:
 
