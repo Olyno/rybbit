@@ -2,6 +2,8 @@
 title: Funnels
 description: Analyze conversion through multi-step user journeys
 ---
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { Step, Steps } from 'fumadocs-ui/components/steps';
 
 ![Funnels Dashboard](/docs/funnels/1.png)
 
@@ -10,28 +12,41 @@ Funnels let you define a sequence of steps — page visits or custom events — 
 ## Creating a Funnel
 
 ![Creating a Funnel](/docs/funnels/2.png)
-
-Click **Create Funnel** to open the funnel builder. Each funnel has:
+<Steps>
+<Step>
+### Click "Create Funnel"
+Each funnel has:
 
 - **Name** — A label for the funnel (e.g., "Signup Flow", "Checkout Process")
 - **Steps** — Two or more sequential steps, each tracking a page visit or custom event
 
-### Page Steps
+</Step>
+<Step>
+### Add Steps
 
-Page steps match pageview events by URL path.
+A funnel always must have at least two steps.
+
+There are two types of steps: **Path Steps** and **Event Steps**.
+
+<Tabs items={['Path Steps', 'Event Steps']}>
+<Tab value="Path Steps">
+Path steps match pageview events by URL path.
 
 - Enter a URL path starting with `/`
 - Wildcards are supported:
   - `*` matches a single path segment — `/products/*` matches `/products/shoes`
   - `**` matches multiple segments — `/docs/**` matches `/docs/api/v2/intro`
 
-### Event Steps
-
+</Tab>
+<Tab value="Event Steps">
 Event steps match custom events by name (e.g., `add_to_cart`, `purchase_completed`).
 
 Events must be tracked using the Rybbit tracking script. See [Track Events](/docs/track-events) for setup instructions.
-
-### Step Options
+</Tab>
+</Tabs>
+</Step>
+<Step>
+### Configure Step Options (optional)
 
 ![Step Options](/docs/funnels/4.png)
 
@@ -41,6 +56,8 @@ Each step has additional configuration options:
 - **Hostname** (optional) — Restrict matching to a specific domain, useful for multi-domain sites
 - **Property Filters** (optional) — Filter by URL parameters (for page steps) or event properties (for event steps). Multiple filters can be added per step, and all must match.
 
+</Step>
+</Steps>
 ## Reading Funnel Results
 
 The funnel visualization updates in real time as you configure steps. For each step, you'll see:
