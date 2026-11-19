@@ -11,8 +11,11 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY client/package.json ./client/package.json
 COPY server/package.json ./server/package.json
 COPY shared/package.json ./shared/package.json
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-    pnpm --filter rybbit-backend... install --frozen-lockfile --store-dir /pnpm/store
+# No `--mount=type=cache` here on purpose: Railway rejects cache mounts whose id
+# is not the literal `s/<service id>-<path>` (ids cannot reference build args),
+# while local/CI builders accept any id. The lock files are COPYed into their own
+# layer above, so this RUN stays layer-cached until they change.
+RUN pnpm --filter rybbit-backend... install --frozen-lockfile
 
 FROM deps AS builder
 COPY shared/ ./shared
@@ -20,8 +23,7 @@ COPY server/ ./server
 RUN pnpm run build:server
 # Keep workspace links during development; deploy materializes a portable tree.
 # drizzle-kit is a production dependency because the entrypoint runs migrations.
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-    pnpm --filter rybbit-backend deploy --legacy --prod --store-dir /pnpm/store /prod/server
+RUN pnpm --filter rybbit-backend deploy --legacy --prod /prod/server
 
 # Runtime image
 FROM node:24.22.1-alpine

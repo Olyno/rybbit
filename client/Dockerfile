@@ -13,8 +13,11 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY client/package.json ./client/package.json
 COPY server/package.json ./server/package.json
 COPY shared/package.json ./shared/package.json
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-    pnpm --filter client... install --frozen-lockfile --store-dir /pnpm/store
+# No `--mount=type=cache` here on purpose: Railway rejects cache mounts whose id
+# is not the literal `s/<service id>-<path>` (ids cannot reference build args),
+# while local/CI builders accept any id. The lock files are COPYed into their own
+# layer above, so this RUN stays layer-cached until they change.
+RUN pnpm --filter client... install --frozen-lockfile
 
 # Rebuild the source code only when needed
 FROM deps AS builder
