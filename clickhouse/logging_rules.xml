@@ -1,0 +1,34 @@
+<clickhouse>
+  <!--
+    Disable the internal system-log tables.
+
+    Without this, the server samples its own thread stacks every 10ms into
+    system.trace_log and keeps metric/text/part logs forever (they have no
+    TTL by default). On an idle instance that alone grows the volume by
+    ~80 MB/day; with any background activity it grows several times faster,
+    which is how self-hosted installs end up with gigabytes of trace_log
+    while the analytics tables stay empty.
+
+    This file is baked into the image built from clickhouse/Dockerfile (used
+    by platform deployments such as Railway) and mounted by docker-compose.
+    Keep the two paths in sync — compose references this file directly.
+  -->
+  <logger>
+    <level>warning</level>
+    <console>true</console>
+  </logger>
+  <query_thread_log remove="remove"/>
+  <query_log remove="remove"/>
+  <query_views_log remove="remove"/>
+  <query_metric_log remove="remove"/>
+  <error_log remove="remove"/>
+  <opentelemetry_span_log remove="remove"/>
+  <text_log remove="remove"/>
+  <trace_log remove="remove"/>
+  <metric_log remove="remove"/>
+  <asynchronous_metric_log remove="remove"/>
+  <session_log remove="remove"/>
+  <part_log remove="remove"/>
+  <latency_log remove="remove"/>
+  <processors_profile_log remove="remove"/>
+</clickhouse>

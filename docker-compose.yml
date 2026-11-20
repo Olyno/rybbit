@@ -22,6 +22,8 @@ services:
 
   clickhouse:
     container_name: clickhouse
+    # Same image platforms build from clickhouse/Dockerfile; compose mounts the
+    # identical logging rules from ./clickhouse/logging_rules.xml instead.
     image: clickhouse/clickhouse-server:26.3.62.3
     volumes:
       - clickhouse-data:/var/lib/clickhouse
@@ -198,28 +200,9 @@ configs:
           <listen_host>0.0.0.0</listen_host>
       </clickhouse>
 
+  # Single source of truth, shared with clickhouse/Dockerfile.
   clickhouse_logging:
-    content: |
-      <clickhouse>
-        <logger>
-            <level>warning</level>
-            <console>true</console>
-        </logger>
-        <query_thread_log remove="remove"/>
-        <query_log remove="remove"/>
-        <query_views_log remove="remove"/>
-        <query_metric_log remove="remove"/>
-        <error_log remove="remove"/>
-        <opentelemetry_span_log remove="remove"/>
-        <text_log remove="remove"/>
-        <trace_log remove="remove"/>
-        <metric_log remove="remove"/>
-        <asynchronous_metric_log remove="remove"/>
-        <session_log remove="remove"/>
-        <part_log remove="remove"/>
-        <latency_log remove="remove"/>
-        <processors_profile_log remove="remove"/>
-      </clickhouse>
+    file: ./clickhouse/logging_rules.xml
 
   clickhouse_resource_limits:
     content: |
