@@ -9,4 +9,6 @@
 # data. Unlike dropping the tables by hand, it survives every redeploy.
 FROM clickhouse/clickhouse-server:26.3.62.3
 
-COPY logging_rules.xml /etc/clickhouse-server/config.d/logging_rules.xml
+# Build context is the repo root (that's what platforms and compose pass):
+# `docker build -f clickhouse/Dockerfile .`
+COPY clickhouse/logging_rules.xml /etc/clickhouse-server/config.d/logging_rules.xml
