@@ -5,32 +5,53 @@ import { clickhouse } from "../../db/clickhouse/clickhouse.js";
 import { db } from "../../db/postgres/postgres.js";
 import { organization, team, teamSiteAccess } from "../../db/postgres/schema.js";
 import { DEFAULT_EVENT_LIMIT, IS_CLOUD, LITE_DASHBOARD } from "../../lib/const.js";
+import { createServiceLogger } from "../../lib/logger/logger.js";
 import { getOrganizationSitesForCaller } from "../../lib/auth-utils.js";
 import { processResults } from "../analytics/utils/utils.js";
 import { siteRequiresPlan } from "../../lib/subscriptionUtils.js";
 import { getSubscriptionInner } from "../stripe/getSubscription.js";
 import { buildSiteSessionCountsQuery } from "./siteSessionCountsQuery.js";
 
-/** Sessions in the last 24 hours for each of these sites. */
-async function getSessionCountMap(siteIds: number[]): Promise<Map<number, number>> {
+const logger = createServiceLogger("sites");
+
+/**
+ * Sessions in the last 24 hours for each of these sites.
+ *
+ * Fails open with an empty map (same as usageService's replay counts): the
+ * counts only decorate the site list, and a ClickHouse outage or a missing
+ * `events` table — a recreated volume the backend has not been restarted
+ * against — must not blank the whole site dashboard.
+ */
+export async function getSessionCountMap(siteIds: number[]): Promise<Map<number, number>> {
   const sessionCountMap = new Map<number, number>();
   if (siteIds.length === 0) {
     return sessionCountMap;
   }
 
-  const sessionCountsResult = await clickhouse.query({
-    query: buildSiteSessionCountsQuery(LITE_DASHBOARD),
-    query_params: { siteIds },
-    format: "JSONEachRow",
-  });
-  const sessionCounts = await processResults(sessionCountsResult);
-
-  if (Array.isArray(sessionCounts)) {
-    sessionCounts.forEach((row: any) => {
-      if (row && typeof row.site_id === "number" && typeof row.total_sessions === "number") {
-        sessionCountMap.set(Number(row.site_id), row.total_sessions);
-      }
+  try {
+    const sessionCountsResult = await clickhouse.query({
+      query: buildSiteSessionCountsQuery(LITE_DASHBOARD),
+      query_params: { siteIds },
+      format: "JSONEachRow",
     });
+    const sessionCounts = await processResults(sessionCountsResult);
+
+    if (Array.isArray(sessionCounts)) {
+      sessionCounts.forEach((row: unknown) => {
+        if (
+          row !== null &&
+          typeof row === "object" &&
+          "site_id" in row &&
+          "total_sessions" in row &&
+          typeof row.site_id === "number" &&
+          typeof row.total_sessions === "number"
+        ) {
+          sessionCountMap.set(row.site_id, row.total_sessions);
+        }
+      });
+    }
+  } catch (error) {
+    logger.warn({ err: error }, "Could not read 24h session counts; the site list continues without them");
   }
   return sessionCountMap;
 }
